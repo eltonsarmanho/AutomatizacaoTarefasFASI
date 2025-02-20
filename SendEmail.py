@@ -15,8 +15,6 @@ EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")  # Senha do e-mail ou App Password
 DESTINATARIOS = ["eltonss@ufpa.br", "fasicuntins@ufpa.br"]  # Lista de e-mails
 
 
-
-
 def enviar_email(resposta):
     """Envia um e-mail notificando os destinatários sobre uma nova resposta."""
     try:
