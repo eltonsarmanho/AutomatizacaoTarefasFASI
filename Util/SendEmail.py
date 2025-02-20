@@ -16,7 +16,6 @@ SMTP_SERVER = "smtp.gmail.com"  # Use "smtp.office365.com" para Outlook, etc.
 SMTP_PORT = 587
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")  # Seu e-mail remetente
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")  # Senha do e-mail ou App Password
-DESTINATARIOS = ["eltonss@ufpa.br", ]  # Lista de e-mails
 
 
 def formatar_data(data_iso):
@@ -24,14 +23,12 @@ def formatar_data(data_iso):
     try:
         import locale
 
-# Listar todos os locales disponíveis
-        print(locale.locale_alias.keys())
         locale.setlocale(locale.LC_TIME, "C")  # Alternativa para Linux
         # Converter a string para um objeto datetime
         dt = datetime.strptime(data_iso, "%Y-%m-%dT%H:%M:%S.%fZ")
         
         # Formatar para o estilo desejado: "20 de fevereiro de 2025, 14h42"
-        data_formatada = dt.strftime("%d de %B de %Y")
+        data_formatada = dt.strftime("%d-%m-%Y")
         
         return data_formatada
     except ValueError:
@@ -41,7 +38,46 @@ def formatar_data(data_iso):
             locale.setlocale(locale.LC_TIME, "pt_BR")  # Tenta sem UTF-8
         except locale.Error:
             locale.setlocale(locale.LC_TIME, "C")  # Fallback para inglês padrão
+
+def enviar_email_projetos(resposta):
+    """Envia um e-mail notificando sobre uma nova submissão do formulário de Projetos."""
     
+    # Criar lista de anexos formatados
+    anexos = "\n".join(resposta[10:]) if len(resposta) > 9 else "Nenhum anexo enviado"
+    body = f"""
+    Olá,
+
+    Uma nova submissão foi registrada no formulário de *Projetos*.
+
+    🧑‍🏫 *Docente:* {resposta[1]}  
+    📝 *Parecerista 1:* {resposta[2]}  
+    📝 *Parecerista 2:* {resposta[3]}  
+    📌 *Projeto:* {resposta[4]}  
+    ⏳ *Carga Horária:* {resposta[5]} horas  
+    📅 *Edital:* {resposta[6]}  
+    📌 *Natureza:* {resposta[7]}  
+    📆 *Ano do Edital:* {resposta[8]}  
+    🏛️ *Solicitação:* {resposta[9]}  
+
+    📎 Anexos: 
+    {anexos}
+
+    🔗 Você pode acessar os anexos através dos links fornecidos.
+
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    🤖 *Sistema de Automação da FASI*
+    """
+
+    DESTINATARIOS = os.getenv("DESTINATARIOS", "").split(",")  # Lista de e-mails
+    pareceristas_env = os.getenv("PARECERISTAS")
+    pareceristas = dict(item.split(":") for item in pareceristas_env.split(","))
+    email1 = pareceristas.get(resposta[2], "")
+    email2 = pareceristas.get(resposta[3], "")
+    DESTINATARIOS.append(email1)
+    DESTINATARIOS.append(email2)
+
+    enviar_email(body=body,nameForm='Projetos',DESTINATARIOS=DESTINATARIOS)
+
 def enviar_email_acc(resposta):
     """Gera e envia e-mail formatado para notificações de ACC."""
     
@@ -67,11 +103,12 @@ def enviar_email_acc(resposta):
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     🤖 Sistema de Automação da FASI
     """
+    DESTINATARIOS = os.getenv("DESTINATARIOS", "").split(",")  # Lista de e-mails
 
-    enviar_email(body=body,nameForm='ACC')
+    enviar_email(body=body,nameForm='ACC',DESTINATARIOS=DESTINATARIOS)
 
     
-def enviar_email(body,nameForm):
+def enviar_email(body,nameForm,DESTINATARIOS):
     """Envia um e-mail notificando os destinatários sobre uma nova resposta."""
     try:
         # Verifica se as credenciais foram carregadas corretamente

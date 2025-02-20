@@ -72,13 +72,25 @@ def baixar_arquivos_do_csv(CSV_FILE = "respostas.csv"):
         link_drive = row["Link do Arquivo"]
         baixar_arquivo_google_drive(link_drive)
 
-def mover_anexos(links_anexos, turma, matricula):
-    ROOT_FOLDER_ID = "1DSkzZ3qr_Qtk-eZl6zUEo4KX-fs6VxH3mx-NsvRGYuRfeHSSJOtLlwLnB2FbHZ39kgaSqg0T"
+def mover_anexos(links_anexos, folder_path, ROOT_FOLDER_ID):
+    """
+    Move os anexos para a pasta correspondente, criando múltiplos níveis de subpastas se necessário.
 
-    """Move os anexos para a pasta correspondente 'Turma/Matricula'."""
-    turma_folder_id = encontrar_ou_criar_pasta(turma, ROOT_FOLDER_ID)
-    aluno_folder_id = encontrar_ou_criar_pasta(matricula, turma_folder_id)
-    
+    :param links_anexos: Lista de links dos anexos a serem movidos.
+    :param folder_path: Caminho da pasta no formato "Folder/SubFolder1/SubFolder2".
+    :param ROOT_FOLDER_ID: ID da pasta raiz no Google Drive.
+    """
+    # Divide o caminho em múltiplas pastas
+    pastas = folder_path.split("/")
+
+    # Começa a busca/criação a partir da ROOT_FOLDER_ID
+    current_folder_id = ROOT_FOLDER_ID
+
+    # Percorre cada nível da estrutura e garante que a pasta existe
+    for pasta in pastas:
+        current_folder_id = encontrar_ou_criar_pasta(pasta, current_folder_id)
+
+    # Após garantir que a estrutura existe, move os anexos para a última pasta criada
     for link in links_anexos:
         if "id=" in link:
             file_id = link.split("id=")[-1]
@@ -86,13 +98,14 @@ def mover_anexos(links_anexos, turma, matricula):
                 # Atualiza o local do arquivo para a pasta correta
                 drive_service.files().update(
                     fileId=file_id,
-                    addParents=aluno_folder_id,
+                    addParents=current_folder_id,
                     removeParents=ROOT_FOLDER_ID,
                     fields="id, parents"
                 ).execute()
-                print(f"✅ Anexo movido para {turma}/{matricula}: {file_id}")
+                print(f"✅ Anexo movido para {folder_path}: {file_id}")
             except Exception as e:
                 print(f"❌ Erro ao mover anexo {file_id}: {e}")
+
 def encontrar_ou_criar_pasta(nome_pasta, parent_id):
     """
     Verifica se a pasta existe dentro do parent_id. Se não existir, cria uma nova.
