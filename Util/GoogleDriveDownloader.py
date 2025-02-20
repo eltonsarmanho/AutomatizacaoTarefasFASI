@@ -2,14 +2,20 @@ from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
 import os
 import pandas as pd
+import os
+import json
+from dotenv import load_dotenv
+
+# Carregar variáveis de ambiente do arquivo .env
+load_dotenv()
 
 # Configurações
 SCOPES = ["https://www.googleapis.com/auth/drive"]
-CREDENTIALS_FILE = "Keys/credentials.json"
+credentials_json = os.getenv("GOOGLE_CLOUD_CREDENTIALS")
+credentials_dict = json.loads(credentials_json)  # Converter string JSON para dicionário
 
-
-# Autenticar na API do Google Drive
-creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=SCOPES)
+# Criar credenciais para autenticação
+creds = Credentials.from_service_account_info(credentials_dict, scopes=SCOPES)
 drive_service = build("drive", "v3", credentials=creds)
 
 

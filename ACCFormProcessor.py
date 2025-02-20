@@ -2,20 +2,24 @@ import gspread
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from flask import Flask, request, jsonify
-from dotenv import load_dotenv
 import threading
-
 from Util import GoogleDriveDownloader, SendEmail
+from dotenv import load_dotenv
+import os
+import json
 
-# Carregar variáveis de ambiente
+# Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
 
 # Configuração da API do Google
-SCOPES = ["https://www.googleapis.com/auth/drive"]
-CREDENTIALS_FILE = "Keys/credentials.json"
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
-# Autenticar na API
-creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=SCOPES)
+# Carregar credenciais do Google Cloud da variável de ambiente
+credentials_json = os.getenv("GOOGLE_CLOUD_CREDENTIALS")
+credentials_dict = json.loads(credentials_json)  # Converter string JSON para dicionário
+
+# Criar credenciais para autenticação
+creds = Credentials.from_service_account_info(credentials_dict, scopes=SCOPES)
 drive_service = build("drive", "v3", credentials=creds)
 client = gspread.authorize(creds)
 
