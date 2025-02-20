@@ -49,15 +49,15 @@ def enviar_email_projetos(resposta):
 
     Uma nova submissão foi registrada no formulário de *Projetos*.
 
-    🧑‍🏫 *Docente:* {resposta[1]}  
-    📝 *Parecerista 1:* {resposta[2]}  
-    📝 *Parecerista 2:* {resposta[3]}  
-    📌 *Projeto:* {resposta[4]}  
-    ⏳ *Carga Horária:* {resposta[5]} horas  
-    📅 *Edital:* {resposta[6]}  
-    📌 *Natureza:* {resposta[7]}  
-    📆 *Ano do Edital:* {resposta[8]}  
-    🏛️ *Solicitação:* {resposta[9]}  
+    🧑‍🏫 Docente: {resposta[1]}  
+    📝 Parecerista 1: {resposta[2]}  
+    📝 Parecerista 2: {resposta[3]}  
+    📌 Projeto: {resposta[4]}  
+    ⏳ Carga Horária: {resposta[5]} horas  
+    📅 Edital: {resposta[6]}  
+    📌 Natureza: {resposta[7]}  
+    📆 Ano do Edital: {resposta[8]}  
+    🏛️ Solicitação: {resposta[9]}  
 
     📎 Anexos: 
     {anexos}
