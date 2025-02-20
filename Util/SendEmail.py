@@ -22,7 +22,11 @@ DESTINATARIOS = ["eltonss@ufpa.br", ]  # Lista de e-mails
 def formatar_data(data_iso):
     """Converte data do formato ISO 8601 para um formato mais legível."""
     try:
-        locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")  # Alternativa para Linux
+        import locale
+
+# Listar todos os locales disponíveis
+        print(locale.locale_alias.keys())
+        locale.setlocale(locale.LC_TIME, "C")  # Alternativa para Linux
         # Converter a string para um objeto datetime
         dt = datetime.strptime(data_iso, "%Y-%m-%dT%H:%M:%S.%fZ")
         
