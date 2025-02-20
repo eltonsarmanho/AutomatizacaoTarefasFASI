@@ -4,7 +4,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
-from google.oauth2.service_account import Credentials
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
 
@@ -16,21 +15,7 @@ EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")  # Senha do e-mail ou App Password
 DESTINATARIOS = ["eltonss@ufpa.br", "fasicuntins@ufpa.br"]  # Lista de e-mails
 
 
-# Configuração da API do Google Drive
-SCOPES = ["https://www.googleapis.com/auth/drive"]
-CREDENTIALS_FILE = "Keys/credentials.json"  # Arquivo de credenciais do Google Drive
-PASTA_DESTINO_ID = "1XK6I_EB7Lt33DM5LMO8AF8F1aiZtucD4kWWfsJgEnPv1kv2o3aijT86_IRmyUiZrFcT3Lq5q"  
-# Autenticação
-creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=SCOPES)
-drive_service = build("drive", "v3", credentials=creds)
 
-def deletar_arquivo_do_drive(file_id):
-    """Deleta um arquivo do Google Drive."""
-    try:
-        drive_service.files().delete(fileId=file_id).execute()
-        print(f"🗑️ Arquivo {file_id} deletado do Google Drive.")
-    except Exception as e:
-        print(f"❌ Erro ao deletar o arquivo {file_id}: {e}")
 
 def enviar_email(resposta):
     """Envia um e-mail notificando os destinatários sobre uma nova resposta."""
