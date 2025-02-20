@@ -3,7 +3,7 @@ import os
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 import threading
-import SendEmail
+import Util.SendEmail as SendEmail
 
 # Carregar variáveis de ambiente (evita expor credenciais no código)
 load_dotenv()
