@@ -30,8 +30,6 @@ def test_email():
     return "ACC enviado!"
 
 
-
-
 @app.route('/webhook', methods=['POST'])
 def receber_dados():
     """Recebe dados do formulário e organiza os anexos na pasta correta."""

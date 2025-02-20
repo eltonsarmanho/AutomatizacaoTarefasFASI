@@ -6,12 +6,7 @@ import pandas as pd
 # Configurações
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 CREDENTIALS_FILE = "Keys/credentials.json"
-PASTA_LOCAL = "Arquivos"
-CSV_FILE = "respostas.csv"
 
-# Criar a pasta de destino se não existir
-if not os.path.exists(PASTA_LOCAL):
-    os.makedirs(PASTA_LOCAL)
 
 # Autenticar na API do Google Drive
 creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=SCOPES)
@@ -27,6 +22,12 @@ def baixar_arquivo_google_drive(link_drive):
     if "id=" not in link_drive:
         print("❌ Formato do link inválido!")
         return
+    
+    PASTA_LOCAL = "Arquivos"
+
+    # Criar a pasta de destino se não existir
+    if not os.path.exists(PASTA_LOCAL):
+        os.makedirs(PASTA_LOCAL)
 
     file_id = link_drive.split("id=")[-1]
 
@@ -37,7 +38,7 @@ def baixar_arquivo_google_drive(link_drive):
 
     # Verificar se o arquivo já existe
     if os.path.exists(caminho_arquivo):
-        #print(f"⚠️ Arquivo já existe: {nome_arquivo}")
+        #print(f"Arquivo já existe: {nome_arquivo}")
         return
 
     # Baixar o arquivo
@@ -47,7 +48,7 @@ def baixar_arquivo_google_drive(link_drive):
 
     print(f"✅ Arquivo baixado: {nome_arquivo}")
 
-def baixar_arquivos_do_csv():
+def baixar_arquivos_do_csv(CSV_FILE = "respostas.csv"):
     """Lê um CSV e baixa os arquivos listados na coluna 'Link do Arquivo'."""
     caminho_completo = os.path.abspath(CSV_FILE)
 

@@ -61,10 +61,6 @@ def enviar_email_acc(resposta):
 
     enviar_email(body=body,nameForm='ACC')
 
-
-
-
-
     
 def enviar_email(body,nameForm):
     """Envia um e-mail notificando os destinatários sobre uma nova resposta."""
