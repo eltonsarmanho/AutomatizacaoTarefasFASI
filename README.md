@@ -10,22 +10,6 @@ Este projeto automatiza o processamento de respostas do **Google Forms**, gerenc
 
 ---
 
-## 📂 **Estrutura do Projeto**
-```
-📦 AutomatizacaoTarefasFASI
- ┣ 📂 Util
- ┃ ┣ 📜 DriveFileDownloader.py   # Gerencia download de arquivos do Google Drive
- ┃ ┣ 📜 GoogleDriveDownloader.py # (Opcional) Código anterior de gerenciamento do Drive
- ┃ ┣ 📜 GoogleSheetsReader.py    # Captura respostas do Google Sheets
- ┃ ┣ 📜 SendEmail.py             # Envio de e-mails automatizados
- ┣ 📜 .env                       # Variáveis de ambiente (credenciais)
- ┣ 📜 main.py                    # Script principal (Webhook)
- ┣ 📜 respostas.csv               # Armazena respostas recebidas
- ┣ 📜 README.md                   # Documentação do projeto
- ┣ 📜 WebHookHandler.py           # Gerencia as requisições do Webhook
-```
-
----
 
 ## 🚀 **Instalação e Configuração**
 
