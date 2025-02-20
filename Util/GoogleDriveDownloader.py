@@ -17,6 +17,7 @@ if not os.path.exists(PASTA_LOCAL):
 creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=SCOPES)
 drive_service = build("drive", "v3", credentials=creds)
 
+
 def baixar_arquivo_google_drive(link_drive):
     """Baixa um arquivo do Google Drive se ainda não estiver salvo localmente."""
     if not link_drive or not isinstance(link_drive, str):
@@ -64,7 +65,44 @@ def baixar_arquivos_do_csv():
         link_drive = row["Link do Arquivo"]
         baixar_arquivo_google_drive(link_drive)
 
+def mover_anexos(links_anexos, turma, matricula):
+    ROOT_FOLDER_ID = "1DSkzZ3qr_Qtk-eZl6zUEo4KX-fs6VxH3mx-NsvRGYuRfeHSSJOtLlwLnB2FbHZ39kgaSqg0T"
 
-# ✅ Executar o script
-if __name__ == "__main__":
-    baixar_arquivos_do_csv()
+    """Move os anexos para a pasta correspondente 'Turma/Matricula'."""
+    turma_folder_id = encontrar_ou_criar_pasta(turma, ROOT_FOLDER_ID)
+    aluno_folder_id = encontrar_ou_criar_pasta(matricula, turma_folder_id)
+    
+    for link in links_anexos:
+        if "id=" in link:
+            file_id = link.split("id=")[-1]
+            try:
+                # Atualiza o local do arquivo para a pasta correta
+                drive_service.files().update(
+                    fileId=file_id,
+                    addParents=aluno_folder_id,
+                    removeParents=ROOT_FOLDER_ID,
+                    fields="id, parents"
+                ).execute()
+                print(f"✅ Anexo movido para {turma}/{matricula}: {file_id}")
+            except Exception as e:
+                print(f"❌ Erro ao mover anexo {file_id}: {e}")
+def encontrar_ou_criar_pasta(nome_pasta, parent_id):
+    """
+    Verifica se a pasta existe dentro do parent_id. Se não existir, cria uma nova.
+    Retorna o ID da pasta.
+    """
+    query = f"'{parent_id}' in parents and mimeType = 'application/vnd.google-apps.folder' and name = '{nome_pasta}'"
+    response = drive_service.files().list(q=query, fields="files(id, name)").execute()
+    
+    pastas = response.get("files", [])
+    if pastas:
+        return pastas[0]["id"]  # Retorna ID da pasta se já existir
+    
+    # Criar pasta caso não exista
+    pasta_metadata = {
+        "name": nome_pasta,
+        "mimeType": "application/vnd.google-apps.folder",
+        "parents": [parent_id]
+    }
+    pasta = drive_service.files().create(body=pasta_metadata, fields="id").execute()
+    return pasta["id"]
