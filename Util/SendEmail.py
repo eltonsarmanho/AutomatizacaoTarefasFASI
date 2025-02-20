@@ -47,7 +47,7 @@ def enviar_email_projetos(resposta):
     body = f"""
     Olá,
 
-    Uma nova submissão foi registrada no formulário de *Projetos*.
+    Uma nova submissão foi registrada no formulário de Projetos.
 
     🧑‍🏫 Docente: {resposta[1]}  
     📝 Parecerista 1: {resposta[2]}  
@@ -65,7 +65,7 @@ def enviar_email_projetos(resposta):
     🔗 Você pode acessar os anexos através dos links fornecidos.
 
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    🤖 *Sistema de Automação da FASI*
+    🤖 Sistema de Automação da FASI
     """
 
     DESTINATARIOS = os.getenv("DESTINATARIOS", "").split(",")  # Lista de e-mails
