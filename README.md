@@ -1,4 +1,3 @@
-```markdown
 # 📌 Automatização de Tarefas FASI
 
 Este projeto automatiza o processamento de respostas do **Google Forms**, gerenciando anexos no **Google Drive**, enviando **notificações por e-mail** e salvando registros em **CSV**.  
