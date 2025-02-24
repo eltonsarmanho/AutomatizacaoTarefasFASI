@@ -109,7 +109,8 @@ def enviar_email_acc(resposta):
 def enviar_email_tcc(resposta):
     """Gera e envia e-mail formatado para notificações de TCC."""
     
-    membros = "\n".join(resposta[7:10]) if len(resposta) > 9 else "\n".join(resposta[7:9])
+    membros = " ".join(resposta[7:10]) if len(resposta) > 9 else " ".join(resposta[7:9])
+
     print(membros)
     # Corpo do e-mail formatado corretamente
     body = f"""\
