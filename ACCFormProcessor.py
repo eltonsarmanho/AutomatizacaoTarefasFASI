@@ -1,7 +1,10 @@
+import os
+import sys
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(project_root)
 from flask import Flask, request, jsonify
 import threading
 from dotenv import load_dotenv
-import os
 from Util import GoogleDriveDownloader, SendEmail
 
 # Carregar variáveis de ambiente do arquivo .env

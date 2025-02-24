@@ -3,7 +3,6 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
-from googleapiclient.discovery import build
 from datetime import datetime
 import locale
 
@@ -21,7 +20,6 @@ EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")  # Senha do e-mail ou App Password
 def formatar_data(data_iso):
     """Converte data do formato ISO 8601 para um formato mais legível."""
     try:
-        import locale
 
         locale.setlocale(locale.LC_TIME, "C")  # Alternativa para Linux
         # Converter a string para um objeto datetime
