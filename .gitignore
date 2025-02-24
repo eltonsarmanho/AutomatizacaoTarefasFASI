@@ -1,3 +1,11 @@
 .env
 venv/
 Keys/credentials.json
+Keys/xxx.json
+Util/__pycache__/CredentialsEncoder.cpython-310.pyc
+Util/__pycache__/GoogleDriveDownloader.cpython-310.pyc
+Util/__pycache__/GoogleDriveDownloader.cpython-311.pyc
+Util/__pycache__/SendEmail.cpython-310.pyc
+Util/__pycache__/GoogleDriveDownloader.cpython-311.pyc
+.idea/AutomatizacaoTarefasFASI.iml
+.idea/misc.xml

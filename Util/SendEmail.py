@@ -107,7 +107,40 @@ def enviar_email_acc(resposta):
 
     enviar_email(body=body,nameForm='ACC',DESTINATARIOS=DESTINATARIOS)
 
+
+def enviar_email_tcc(resposta):
+    """Gera e envia e-mail formatado para notificações de TCC."""
     
+    membros = "\n".join(resposta[7:10]) if len(resposta) > 9 else "\n".join(resposta[7:9])
+    print(membros)
+    # Corpo do e-mail formatado corretamente
+    body = f"""\
+    Olá,
+
+    Uma nova resposta foi registrada no formulário requisições de TCC.
+
+    📅 Data: {formatar_data(resposta[0])}
+    🎓 Nome: {resposta[1]}
+    🔢 Matrícula: {resposta[2]}
+    📌 Orientador: {resposta[6]}    
+    👤 Membros da Banca: {membros}
+
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    🤖 Sistema de Automação da FASI
+    """
+
+    DESTINATARIOS = os.getenv("DESTINATARIOS", "").split(",")  # Lista de e-mails
+    pareceristas_env = os.getenv("PARECERISTAS")
+    pareceristas = dict(item.split(":") for item in pareceristas_env.split(","))
+    orientador_email = pareceristas.get(resposta[6], "")
+    aluno_email = resposta[3]
+    DESTINATARIOS.append(orientador_email)
+    DESTINATARIOS.append(aluno_email)
+
+    enviar_email(body=body,nameForm='TCC',DESTINATARIOS=DESTINATARIOS)
+
+
+
 def enviar_email(body,nameForm,DESTINATARIOS):
     """Envia um e-mail notificando os destinatários sobre uma nova resposta."""
     try:

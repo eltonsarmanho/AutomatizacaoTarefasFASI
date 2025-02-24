@@ -1,27 +1,11 @@
-import gspread
-from google.oauth2.service_account import Credentials
-from googleapiclient.discovery import build
 from flask import Flask, request, jsonify
 import threading
-from Util import GoogleDriveDownloader, SendEmail
 from dotenv import load_dotenv
 import os
-import json
+from Util import GoogleDriveDownloader, SendEmail
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
-
-# Configuração da API do Google
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-
-# Carregar credenciais do Google Cloud da variável de ambiente
-credentials_json = os.getenv("GOOGLE_CLOUD_CREDENTIALS")
-credentials_dict = json.loads(credentials_json)  # Converter string JSON para dicionário
-
-# Criar credenciais para autenticação
-creds = Credentials.from_service_account_info(credentials_dict, scopes=SCOPES)
-drive_service = build("drive", "v3", credentials=creds)
-client = gspread.authorize(creds)
 
 # ID da pasta "File Response"
 
@@ -53,6 +37,8 @@ def receber_dados():
             runACC(resposta)
         elif form_id == "PROJETOS":
             runProjetos(resposta=resposta)
+        elif form_id == "TCC":
+            runTCC(resposta=resposta)
         else:
             return jsonify({"status": "erro", "mensagem": "Formulário desconhecido!"}), 400
 
@@ -69,7 +55,7 @@ def runACC(resposta):
     email = resposta[3]
     turma = resposta[4]
     links_anexos = resposta[5].split(", ")  # Lista de links dos anexos
-    ROOT_FOLDER_ID = pareceristas_env = os.getenv("ACC_FOLDER_ID")
+    ROOT_FOLDER_ID = os.getenv("ACC_FOLDER_ID")
     pasta_destino = f"{turma}/{matricula}";
 
     # Criar threads para executar funções em paralelo
@@ -83,6 +69,28 @@ def runACC(resposta):
         # Aguardar ambas as threads terminarem
     email_thread.join()
     drive_thread.join()
+
+def runTCC(resposta):
+    nome = resposta[1]
+    matricula = resposta[2]
+    email = resposta[3]
+    trabalho = resposta[4]
+    modalidade = resposta[5]
+    orientador = resposta[6]
+    membro1 = resposta[7]
+    membro2 = resposta[8]
+    if len(resposta)>9:
+        membro3 = resposta[9]
+
+    # Criar threads para executar funções em paralelo
+    email_thread = threading.Thread(target=SendEmail.enviar_email_tcc, args=(resposta,))
+
+        # Iniciar as threads
+    email_thread.start()
+
+        # Aguardar ambas as threads terminarem
+    email_thread.join()
+
 def runProjetos(resposta):
     docente = resposta[1]
     parecerista_1 = resposta[2]
@@ -96,7 +104,7 @@ def runProjetos(resposta):
     # Extrai os links corretamente
     links_anexos = resposta[10].split(", ")
 
-    ROOT_FOLDER_ID = pareceristas_env = os.getenv("PROJETOS_FOLDER_ID")
+    ROOT_FOLDER_ID =  os.getenv("PROJETOS_FOLDER_ID")
     pasta_destino = f"{edital}/{ano_edital}/{docente}/{solicitacao}";
     email_thread = threading.Thread(target=SendEmail.enviar_email_projetos, args=(resposta,))
     drive_thread = threading.Thread(target=GoogleDriveDownloader.mover_anexos,args=(links_anexos,pasta_destino,ROOT_FOLDER_ID))

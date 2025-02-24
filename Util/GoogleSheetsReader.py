@@ -3,7 +3,8 @@ from google.oauth2.service_account import Credentials
 import pandas as pd
 from dotenv import load_dotenv
 import os
-import json
+from Util import CredentialsEncoder
+from googleapiclient.discovery import build
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -12,11 +13,14 @@ load_dotenv()
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 # Carregar credenciais do Google Cloud da variável de ambiente
-credentials_json = os.getenv("GOOGLE_CLOUD_CREDENTIALS")
-credentials_dict = json.loads(credentials_json)  # Converter string JSON para dicionário
+credentials_string = os.getenv("GOOGLE_CREDENTIALS")
+
+base64_credentials = CredentialsEncoder.convertJsonToBase64(credentials_string)
+credentials_dict = CredentialsEncoder.convertBase64ToJson(base64_credentials)
 
 # Criar credenciais para autenticação
 creds = Credentials.from_service_account_info(credentials_dict, scopes=SCOPES)
+drive_service = build("drive", "v3", credentials=creds)
 client = gspread.authorize(creds)
 
 # Acessar a planilha de respostas do Google Forms
