@@ -18,7 +18,7 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 # Carregar credenciais do Google Cloud da variável de ambiente
 #credentials_string = os.getenv("GOOGLE_CREDENTIALS")
 #base64_credentials = CredentialsEncoder.convertJsonToBase64(credentials_string)
-base64_credentials = os.getenv("GOOGLE_CLOUD_CREDENTIALS_BASE64")
+base64_credentials = os.getenv("GOOGLE_CLOUD_CREDENTIALS_FASI_BASE64")
 credentials_dict = CredentialsEncoder.convertBase64ToJson(base64_credentials)
 
 # Criar credenciais para autenticação
