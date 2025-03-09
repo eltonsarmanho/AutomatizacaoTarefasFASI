@@ -7,7 +7,7 @@ from datetime import datetime
 import locale
 
 # Carregar variáveis de ambiente do arquivo .env
-load_dotenv()
+load_dotenv(override=True)
 
 
 # Configurações do servidor de e-mail
@@ -52,8 +52,8 @@ def enviar_email_projetos(resposta):
     📝 Parecerista 2: {resposta[3]}  
     📌 Projeto: {resposta[4]}  
     ⏳ Carga Horária: {resposta[5]} horas  
-    📅 Edital: {resposta[6]}  
-    📌 Natureza: {resposta[7]}  
+    📰 Edital: {resposta[6]}  
+    🏷️ Natureza: {resposta[7]}  
     📆 Ano do Edital: {resposta[8]}  
     🏛️ Solicitação: {resposta[9]}  
 
@@ -120,8 +120,8 @@ def enviar_email_tcc(resposta):
 
     📅 Data: {formatar_data(resposta[0])}
     🎓 Nome: {resposta[1]}
-    🔢 Matrícula: {resposta[2]}
-    📌 Orientador: {resposta[6]}    
+    🔢 Matrícula: {resposta[4]}
+    📌 Orientador: {resposta[5]}    
     👤 Membros da Banca: {membros}
 
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -137,6 +137,70 @@ def enviar_email_tcc(resposta):
     DESTINATARIOS.append(aluno_email)
 
     enviar_email(body=body,nameForm='TCC',DESTINATARIOS=DESTINATARIOS)
+
+
+def enviar_email_tcc_documento(resposta):
+    """Gera e envia e-mail formatado para notificações de TCC."""
+    
+
+    anexos = "\n".join(resposta[8:]) if len(resposta) > 7 else "Nenhum anexo enviado"
+    # Corpo do e-mail formatado corretamente
+    body = f"""\
+    Olá,
+
+    Uma nova resposta foi registrada no formulário de TCC.
+
+    📅 Data: {formatar_data(resposta[0])}
+    🎓 Nome: {resposta[1]}
+    🔢 Matrícula: {resposta[4]}
+    👤 Orientador: {resposta[5]}    
+    📌 Título: {resposta[6]}
+    📎 Anexos: 
+    {anexos}
+
+    🔗 Você pode acessar os anexos através dos links fornecidos.
+
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    🤖 Sistema de Automação da FASI
+    """
+
+    DESTINATARIOS = os.getenv("DESTINATARIOS", "").split(",")  # Lista de e-mails    
+    aluno_email = resposta[2]
+    DESTINATARIOS.append(aluno_email)
+
+    enviar_email(body=body,nameForm=resposta[7],DESTINATARIOS=DESTINATARIOS)
+
+
+def enviar_email_estagio(resposta):
+    """Gera e envia e-mail formatado para notificações de Estágio."""
+    
+
+    anexos = "\n".join(resposta[8:]) if len(resposta) > 7 else "Nenhum anexo enviado"
+    # Corpo do e-mail formatado corretamente
+    body = f"""\
+    Olá,
+
+    Uma nova resposta foi registrada no formulário de Estágio.
+
+    📅 Data: {formatar_data(resposta[0])}
+    🎓 Nome: {resposta[1]}
+    🔢 Matrícula: {resposta[4]}
+    👤 Orientador: {resposta[5]}    
+    📌 Título: {resposta[6]}
+    📎 Anexos: 
+    {anexos}
+
+    🔗 Você pode acessar os anexos através dos links fornecidos.
+
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    🤖 Sistema de Automação da FASI
+    """
+
+    DESTINATARIOS = os.getenv("DESTINATARIOS", "").split(",")  # Lista de e-mails    
+    aluno_email = resposta[2]
+    DESTINATARIOS.append(aluno_email)
+
+    enviar_email(body=body,nameForm=resposta[7],DESTINATARIOS=DESTINATARIOS)
 
 
 

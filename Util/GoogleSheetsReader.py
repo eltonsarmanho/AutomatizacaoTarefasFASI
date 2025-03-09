@@ -10,7 +10,7 @@ from googleapiclient.discovery import build
 from Util import CredentialsEncoder
 
 # Carregar variáveis de ambiente do arquivo .env
-load_dotenv()
+load_dotenv(override=True)
 
 # Configuração da API do Google
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]

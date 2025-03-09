@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 from Util import GoogleDriveDownloader, SendEmail
 
 # Carregar variáveis de ambiente do arquivo .env
-load_dotenv()
+load_dotenv(override=True)
+
 
 # ID da pasta "File Response"
 
@@ -40,8 +41,13 @@ def receber_dados():
             runACC(resposta)
         elif form_id == "PROJETOS":
             runProjetos(resposta=resposta)
-        elif form_id == "TCC":
+        elif form_id == "TCC": #Requerimento TCC
             runTCC(resposta=resposta)
+        elif form_id == "TCC_DOCUMENTO": #Documento TCC 1 ou 2
+            runTCC_DOCUMENTO(resposta=resposta)
+        elif form_id == "ESTAGIO": 
+            runEstagio(resposta=resposta)
+        
         else:
             return jsonify({"status": "erro", "mensagem": "Formulário desconhecido!"}), 400
 
@@ -51,6 +57,49 @@ def receber_dados():
 
     except Exception as e:
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
+
+def runEstagio(resposta):
+    nome = resposta[1]
+    email = resposta[2]
+    turma = resposta[3]
+    matricula = resposta[4]
+    orientador = resposta[5]
+    titulo = resposta[6]
+    componente_curricular = resposta[7]
+    links_anexos = resposta[8].split(", ")  # Lista de links dos anexos
+    ROOT_FOLDER_ID = os.getenv("ESTAGIO_FOLDER_ID")
+    
+    pasta_destino = f"{componente_curricular}/{turma}/{nome}";
+    # Criar threads para executar funções em paralelo   
+    email_thread = threading.Thread(target=SendEmail.enviar_email_estagio, args=(resposta,))
+    drive_thread = threading.Thread(target=GoogleDriveDownloader.mover_anexos,args=(links_anexos,pasta_destino,ROOT_FOLDER_ID))
+    # Iniciar as threads
+    email_thread.start()
+    drive_thread.start()
+    # Aguardar ambas as threads terminarem
+    email_thread.join()
+    drive_thread.join()
+def runTCC_DOCUMENTO(resposta):
+    nome = resposta[1]
+    email = resposta[2]
+    turma = resposta[3]
+    matricula = resposta[4]
+    orientador = resposta[5]
+    titulo = resposta[6]
+    componente_curricular = resposta[7]
+    links_anexos = resposta[8].split(", ")  # Lista de links dos anexos
+    ROOT_FOLDER_ID = os.getenv("TCC_FOLDER_ID")
+    
+    pasta_destino = f"{componente_curricular}/{turma}/{nome}";
+    # Criar threads para executar funções em paralelo   
+    email_thread = threading.Thread(target=SendEmail.enviar_email_tcc_documento, args=(resposta,))
+    drive_thread = threading.Thread(target=GoogleDriveDownloader.mover_anexos,args=(links_anexos,pasta_destino,ROOT_FOLDER_ID))
+    # Iniciar as threads
+    email_thread.start()
+    drive_thread.start()
+    # Aguardar ambas as threads terminarem
+    email_thread.join()
+    drive_thread.join()
 
 def runACC(resposta):
     nome = resposta[1]
