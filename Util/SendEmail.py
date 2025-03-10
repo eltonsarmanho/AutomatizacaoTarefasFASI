@@ -141,7 +141,7 @@ def enviar_email_tcc(resposta):
     DESTINATARIOS.append(orientador_email)
     DESTINATARIOS.append(aluno_email)
 
-    enviar_email(body=body,nameForm='TCC',DESTINATARIOS=DESTINATARIOS)
+    enviar_email(body=body,nameForm='Requisição de Apresentação e Matrícula de TCC',DESTINATARIOS=DESTINATARIOS)
 
 
 def enviar_email_tcc_documento(resposta):
