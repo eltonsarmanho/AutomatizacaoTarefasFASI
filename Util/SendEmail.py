@@ -5,6 +5,9 @@ from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 from datetime import datetime
 import locale
+from email.mime.base import MIMEBase
+from email import encoders
+from Util.PDFGenerator import gerar_pdf_projetos
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv(override=True)
@@ -61,7 +64,7 @@ def enviar_email_projetos(resposta):
     {anexos}
 
     🔗 Você pode acessar os anexos através dos links fornecidos.
-
+    🔎 Os pareceristas devem analisar artefatos e assinar o parecer.
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     🤖 Sistema de Automação da FASI
     """
@@ -74,7 +77,9 @@ def enviar_email_projetos(resposta):
     DESTINATARIOS.append(email1)
     DESTINATARIOS.append(email2)
 
-    enviar_email(body=body,nameForm='Projetos',DESTINATARIOS=DESTINATARIOS)
+    caminho_pdf = gerar_pdf_projetos(resposta)
+    
+    enviar_email(body=body,nameForm='Projetos',DESTINATARIOS=DESTINATARIOS,caminho_pdf=caminho_pdf)
 
 def enviar_email_acc(resposta):
     """Gera e envia e-mail formatado para notificações de ACC."""
@@ -204,7 +209,7 @@ def enviar_email_estagio(resposta):
 
 
 
-def enviar_email(body,nameForm,DESTINATARIOS):
+def enviar_email(body,nameForm,DESTINATARIOS,caminho_pdf=None):
     """Envia um e-mail notificando os destinatários sobre uma nova resposta."""
     try:
         # Verifica se as credenciais foram carregadas corretamente
@@ -220,6 +225,18 @@ def enviar_email(body,nameForm,DESTINATARIOS):
         # Corpo do e-mail
         
         msg.attach(MIMEText(body, "plain"))
+
+        # Anexar o PDF gerado
+        if caminho_pdf is not None:
+            with open(caminho_pdf, "rb") as pdf_file:
+                part = MIMEBase("application", "octet-stream")
+                part.set_payload(pdf_file.read())
+                encoders.encode_base64(part)
+                part.add_header(
+                    "Content-Disposition",
+                    f"attachment; filename={os.path.basename(caminho_pdf)}",
+                )
+                msg.attach(part)
 
         # Conectar ao servidor SMTP e enviar o e-mail
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
