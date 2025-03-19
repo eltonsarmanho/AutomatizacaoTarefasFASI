@@ -125,10 +125,12 @@ def enviar_email_tcc(resposta):
 
     📅 Data: {formatar_data(resposta[0])}
     🎓 Nome: {resposta[1]}
-    🔢 Matrícula: {resposta[4]}
-    📌 Orientador: {resposta[5]}    
+    🔢 Matrícula: {resposta[2]}
+    📌 Orientador: {resposta[6]}    
     👤 Membros da Banca: {membros}
-
+    📖 Título: {resposta[4]}
+    🔤 Resumo: {resposta[10]}   
+    🔑 Palavras-chave: {resposta[11]}
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     🤖 Sistema de Automação da FASI
     """

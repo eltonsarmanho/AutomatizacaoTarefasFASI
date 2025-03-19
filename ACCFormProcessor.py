@@ -131,9 +131,10 @@ def runTCC(resposta):
     orientador = resposta[6]
     membro1 = resposta[7]
     membro2 = resposta[8]
-    if len(resposta)>9:
+    if len(resposta)>11:
         membro3 = resposta[9]
-
+    resumo = resposta[10]
+    palavras_chave = resposta[11]
     # Criar threads para executar funções em paralelo
     email_thread = threading.Thread(target=SendEmail.enviar_email_tcc, args=(resposta,))
 
