@@ -115,7 +115,7 @@ def enviar_email_tcc(resposta):
     """Gera e envia e-mail formatado para notificações de TCC."""
     
     
-    membros = resposta[7]+" e "+resposta[8] if len(resposta) > 9 else resposta[7]+", "+resposta[8]+" e "+resposta[9]
+    membros = resposta[7]+", "+resposta[8]+" e "+resposta[9] if len(resposta) > 11 else resposta[7]+" e "+resposta[8] 
 
     print(membros)
     # Corpo do e-mail formatado corretamente
