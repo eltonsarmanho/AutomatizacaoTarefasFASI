@@ -115,7 +115,7 @@ def enviar_email_tcc(resposta):
     """Gera e envia e-mail formatado para notificações de TCC."""
     
     
-    membros = resposta[7]+", "+resposta[8]+" e "+resposta[9] if len(resposta) > 11 else resposta[7]+" e "+resposta[8] 
+    membros = resposta[7]+", "+resposta[8]+" e "+resposta[9] if len(resposta) > 12 else resposta[7]+" e "+resposta[8] 
 
     print(membros)
     # Corpo do e-mail formatado corretamente
@@ -124,7 +124,7 @@ def enviar_email_tcc(resposta):
 
     Uma nova resposta foi registrada no formulário requisições de TCC.
 
-    📅 Data: {formatar_data(resposta[0])}
+    📅 Data da Defesa: {resposta[12]}
     🎓 Nome: {resposta[1]}
     🔢 Matrícula: {resposta[2]}
     📌 Orientador: {resposta[6]}    

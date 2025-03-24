@@ -79,6 +79,7 @@ def runEstagio(resposta):
     # Aguardar ambas as threads terminarem
     email_thread.join()
     drive_thread.join()
+
 def runTCC_DOCUMENTO(resposta):
     nome = resposta[1]
     email = resposta[2]
@@ -135,6 +136,7 @@ def runTCC(resposta):
         membro3 = resposta[9]
     resumo = resposta[10]
     palavras_chave = resposta[11]
+    data = resposta[12]
     # Criar threads para executar funções em paralelo
     email_thread = threading.Thread(target=SendEmail.enviar_email_tcc, args=(resposta,))
 
