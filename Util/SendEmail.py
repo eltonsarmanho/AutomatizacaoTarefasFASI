@@ -29,7 +29,7 @@ def formatar_data(data_iso):
         dt = datetime.strptime(data_iso, "%Y-%m-%dT%H:%M:%S.%fZ")
         
         # Formatar para o estilo desejado: "20 de fevereiro de 2025, 14h42"
-        data_formatada = dt.strftime("%d-%m-%Y")
+        data_formatada = dt.strftime("%d-%m-%Y %Hh%M")
         
         return data_formatada
     except ValueError:
@@ -124,7 +124,7 @@ def enviar_email_tcc(resposta):
 
     Uma nova resposta foi registrada no formulário requisições de TCC.
 
-    📅 Data da Defesa: {resposta[12]}
+    📅 Data da Defesa: {formatar_data(resposta[12])}
     🎓 Nome: {resposta[1]}
     🔢 Matrícula: {resposta[2]}
     📌 Orientador: {resposta[6]}    
