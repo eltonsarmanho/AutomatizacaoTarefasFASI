@@ -174,6 +174,9 @@ def enviar_email_tcc_documento(resposta):
 
     DESTINATARIOS = os.getenv("DESTINATARIOS", "").split(",")  # Lista de e-mails    
     aluno_email = resposta[2]
+    if (resposta[7] == "TCC 2"):
+        DESTINATARIOS.append("bibcameta@ufpa.br")
+   
     DESTINATARIOS.append(aluno_email)
 
     enviar_email(body=body,nameForm=resposta[7],DESTINATARIOS=DESTINATARIOS)
