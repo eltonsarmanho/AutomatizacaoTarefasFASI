@@ -6,7 +6,9 @@ sys.path.append(project_root)
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from dotenv import load_dotenv
-
+import time
+import random
+import traceback
 from Util import CredentialsEncoder
 
 
@@ -79,59 +81,68 @@ def baixar_arquivos_do_csv(CSV_FILE = "respostas.csv"):
         link_drive = row["Link do Arquivo"]
         baixar_arquivo_google_drive(link_drive)
 
+def retry_api_call(func, retries=3, delay_base=2):
+    """
+    Executa uma função com tentativas de repetição e backoff exponencial.
+    """
+    for attempt in range(retries):
+        try:
+            return func()
+        except Exception as e:
+            wait_time = (delay_base ** attempt) + random.uniform(0, 1)
+            print(f"⚠️ Tentativa {attempt+1} falhou. Aguardando {wait_time:.2f}s antes de tentar novamente...")
+            time.sleep(wait_time)
+    print("❌ Todas as tentativas falharam.")
+    return None
+
 def mover_anexos(links_anexos, folder_path, ROOT_FOLDER_ID):
     """
     Move os anexos para a pasta correspondente, garantindo que a estrutura de pastas exista.
-
-    :param links_anexos: Lista de links dos anexos a serem movidos.
-    :param folder_path: Caminho da pasta no formato "Folder/SubFolder1/SubFolder2".
-    :param ROOT_FOLDER_ID: ID da pasta raiz no Google Drive.
     """
-
-    # Divide o caminho em múltiplas pastas
     pastas = folder_path.split("/")
-    #print(f"📂 Pastas a criar/verificar: {pastas}")
-
-    # Começa a busca/criação a partir da ROOT_FOLDER_ID
     current_folder_id = ROOT_FOLDER_ID
-    #print(f"🔍 Pasta raiz: {ROOT_FOLDER_ID}")
 
-    # Percorre cada nível da estrutura e garante que a pasta existe
     for pasta in pastas:
         current_folder_id = encontrar_ou_criar_pasta(pasta, current_folder_id)
-        #print(f"📁 Criado/Encontrado: {pasta} → ID: {current_folder_id}")
 
-    # Verifica se a pasta final realmente existe antes de mover arquivos
     if not current_folder_id:
-        #print("❌ Erro: A pasta final não foi encontrada/criada corretamente!")
+        print("❌ Erro: A pasta final não foi encontrada/criada corretamente!")
         return
 
-    #print(f"✅ Pasta final onde os arquivos serão movidos: {current_folder_id}")
-
-    # Move os anexos para a pasta final criada
     for link in links_anexos:
         if "id=" in link:
             file_id = link.split("id=")[-1]
 
             try:
-                # Verifica onde o arquivo está atualmente
-                arquivo_info = drive_service.files().get(fileId=file_id, fields="id, parents").execute()
+                def get_file_info():
+                    return drive_service.files().get(fileId=file_id, fields="id, parents").execute()
+
+                arquivo_info = retry_api_call(get_file_info)
+                if not arquivo_info:
+                    print(f"❌ Falha ao obter informações do arquivo {file_id}")
+                    continue
+
                 parents_atual = arquivo_info.get("parents", [])
 
-                #print(f"📂 Arquivo {file_id} atualmente nas pastas: {parents_atual}")
-
-                # Garante que o arquivo seja removido das pastas anteriores
-                if parents_atual:
-                    drive_service.files().update(
+                def move_file():
+                    return drive_service.files().update(
                         fileId=file_id,
                         addParents=current_folder_id,
                         removeParents=",".join(parents_atual),
                         fields="id, parents"
                     ).execute()
-                    #print(f"✅ Anexo movido para {folder_path}: {file_id}")
+
+                result = retry_api_call(move_file)
+                if result:
+                    print(f"✅ Anexo movido para {folder_path}: {file_id}")
+                else:
+                    print(f"❌ Falha ao mover o anexo {file_id}")
+
+                time.sleep(0.2)  # Evita excesso de requisições
 
             except Exception as e:
-                print(f"❌ Erro ao mover anexo {file_id}: {e}")
+                print(f"❌ Erro inesperado ao mover anexo {file_id}: {e}")
+                traceback.print_exc()
 
 
 def encontrar_ou_criar_pasta(nome_pasta, parent_id):
