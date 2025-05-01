@@ -114,21 +114,6 @@ def mover_anexos(links_anexos, folder_path, ROOT_FOLDER_ID):
             file_id = link.split("id=")[-1]
 
             try:
-                # 🔒 Garantir permissão de edição ao serviço
-                def garantir_permissao():
-                    return drive_service.permissions().create(
-                        fileId=file_id,
-                        body={
-                            "role": "writer",
-                            "type": "user",
-                            "emailAddress": "contaufpafasi@servicoweb-453121.iam.gserviceaccount.com"
-                        },
-                        sendNotificationEmail=False
-                    ).execute()
-
-                retry_api_call(garantir_permissao)
-
-                # 📂 Obter pasta atual do arquivo
                 def get_file_info():
                     return drive_service.files().get(fileId=file_id, fields="id, parents").execute()
 
@@ -139,7 +124,6 @@ def mover_anexos(links_anexos, folder_path, ROOT_FOLDER_ID):
 
                 parents_atual = arquivo_info.get("parents", [])
 
-                # 🔄 Mover arquivo para a nova pasta
                 def move_file():
                     return drive_service.files().update(
                         fileId=file_id,
@@ -154,12 +138,11 @@ def mover_anexos(links_anexos, folder_path, ROOT_FOLDER_ID):
                 else:
                     print(f"❌ Falha ao mover o anexo {file_id}")
 
-                time.sleep(0.2)
+                time.sleep(0.2)  # Evita excesso de requisições
 
             except Exception as e:
                 print(f"❌ Erro inesperado ao mover anexo {file_id}: {e}")
                 traceback.print_exc()
-
 
 
 def encontrar_ou_criar_pasta(nome_pasta, parent_id):
