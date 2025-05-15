@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 import time
 import random
 import traceback
-from Util import CredentialsEncoder
+from SERVER.UTIL import CredentialsEncoder
 
 
 # Carregar variáveis de ambiente do arquivo .env

@@ -8,7 +8,7 @@ def gerar_pdf_projetos(resposta):
     """Gera um PDF contendo as informações do formulário de Projetos, ajustando o conteúdo conforme Natureza e Solicitação."""
     
     nome_arquivo = f"Parecer_{resposta[1].replace(' ', '_')}.pdf"
-    caminho_pdf = os.path.join("/tmp", nome_arquivo)  # Salvar no diretório temporário
+    caminho_pdf = os.path.join( nome_arquivo)  # Salvar no diretório temporário
 
     # Configuração do PDF
     largura, altura = A4
@@ -44,9 +44,20 @@ def gerar_pdf_projetos(resposta):
     # Dados do Projeto
     c.setFont("Helvetica", 12)
     y_pos = margem_superior - 100
-    c.drawString(margem_esquerda, y_pos, f"Título do Projeto: {projeto}")
-    y_pos -= 20
-    c.drawString(margem_esquerda, y_pos, f"Coordenador: {docente}")
+    
+    # Aplicar quebra de linha para o título do projeto
+    titulo_texto = f"Título do Projeto: {projeto}"
+    linhas_titulo = wrap_text(titulo_texto, largura_texto, c)
+    for linha in linhas_titulo:
+        c.drawString(margem_esquerda, y_pos, linha)
+        y_pos -= 20
+    
+    # Aplicar quebra de linha para o coordenador caso necessário
+    coord_texto = f"Coordenador: {docente}"
+    linhas_coord = wrap_text(coord_texto, largura_texto, c)
+    for linha in linhas_coord:
+        c.drawString(margem_esquerda, y_pos, linha)
+        y_pos -= 20
 
     # Corpo do parecer ajustado conforme natureza e solicitação
     parecer_texto = gerar_texto_parecer(natureza, solicitacao, docente, parecerista_1, parecerista_2, carga_horaria)

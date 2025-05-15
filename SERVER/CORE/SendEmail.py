@@ -7,7 +7,7 @@ from datetime import datetime
 import locale
 from email.mime.base import MIMEBase
 from email import encoders
-from Util.PDFGenerator import gerar_pdf_projetos
+from CORE.PDFGenerator import gerar_pdf_projetos
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv(override=True)

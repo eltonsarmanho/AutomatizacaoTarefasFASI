@@ -7,7 +7,7 @@ from google.oauth2.service_account import Credentials
 import pandas as pd
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
-from Util import CredentialsEncoder
+from SERVER.UTIL import CredentialsEncoder
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv(override=True)

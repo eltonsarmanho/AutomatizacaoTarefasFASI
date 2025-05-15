@@ -5,7 +5,7 @@ sys.path.append(project_root)
 from flask import Flask, request, jsonify
 import threading
 from dotenv import load_dotenv
-from Util import GoogleDriveDownloader, SendEmail
+from SERVER.CORE import GoogleDriveDownloader, SendEmail
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv(override=True)
