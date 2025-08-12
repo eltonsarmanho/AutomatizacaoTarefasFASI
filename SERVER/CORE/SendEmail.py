@@ -108,7 +108,6 @@ def enviar_email_plano_ensino(resposta):
     email1 = pareceristas.get(resposta[1], "")
     DESTINATARIOS.append(email1)
 
-    caminho_pdf = gerar_pdf_projetos(resposta)
     
     enviar_email(body=body,nameForm='Plano de Ensino',DESTINATARIOS=DESTINATARIOS)
 
