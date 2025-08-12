@@ -81,6 +81,37 @@ def enviar_email_projetos(resposta):
     
     enviar_email(body=body,nameForm='Projetos',DESTINATARIOS=DESTINATARIOS,caminho_pdf=caminho_pdf)
 
+def enviar_email_plano_ensino(resposta):
+    """Envia um e-mail notificando sobre uma nova submissão do formulário de Plano de Ensino."""
+
+    # Criar lista de anexos formatados
+    anexos = "\n".join(resposta[3:]) if len(resposta) > 9 else "Nenhum anexo enviado"
+    body = f"""
+    Olá,
+
+    Uma nova submissão foi registrada no formulário de Plano de Ensino.
+
+    🧑‍🏫 Docente: {resposta[1]}   
+    📆 Semestre: {resposta[8]}  
+
+    📎 Anexos: 
+    {anexos}
+
+    🔗 Você pode acessar os anexos através dos links fornecidos.
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    🤖 Sistema de Automação da FASI
+    """
+
+    DESTINATARIOS = os.getenv("DESTINATARIOS", "").split(",")  # Lista de e-mails
+    pareceristas_env = os.getenv("PARECERISTAS")
+    pareceristas = dict(item.split(":") for item in pareceristas_env.split(","))
+    email1 = pareceristas.get(resposta[1], "")
+    DESTINATARIOS.append(email1)
+
+    caminho_pdf = gerar_pdf_projetos(resposta)
+    
+    enviar_email(body=body,nameForm='Plano de Ensino',DESTINATARIOS=DESTINATARIOS)
+
 def enviar_email_acc(resposta):
     """Gera e envia e-mail formatado para notificações de ACC."""
     

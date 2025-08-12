@@ -47,6 +47,8 @@ def receber_dados():
             runTCC_DOCUMENTO(resposta=resposta)
         elif form_id == "ESTAGIO": 
             runEstagio(resposta=resposta)
+        elif form_id == "PlanoEnsino": 
+            runPlanoEnsino(resposta=resposta)
         
         else:
             return jsonify({"status": "erro", "mensagem": "Formulário desconhecido!"}), 400
@@ -58,6 +60,24 @@ def receber_dados():
     except Exception as e:
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
 
+
+def runPlanoEnsino(resposta):
+    nome = resposta[1]
+    semestre = resposta[2]
+    
+    links_anexos = resposta[3].split(", ")  # Lista de links dos anexos
+    ROOT_FOLDER_ID = os.getenv("PLANO_ENSINO_FOLDER_ID")
+    
+    pasta_destino = f"{semestre}";
+    # Criar threads para executar funções em paralelo   
+    email_thread = threading.Thread(target=SendEmail.enviar_email_plano_ensino, args=(resposta,))
+    drive_thread = threading.Thread(target=GoogleDriveDownloader.mover_anexos,args=(links_anexos,pasta_destino,ROOT_FOLDER_ID))
+    # Iniciar as threads
+    email_thread.start()
+    drive_thread.start()
+    # Aguardar ambas as threads terminarem
+    email_thread.join()
+    drive_thread.join()
 def runEstagio(resposta):
     nome = resposta[1]
     email = resposta[2]

@@ -13,6 +13,7 @@ O sistema atende a diferentes tipos de formulários e processos acadêmicos:
 - **TCC**: Processamento de requisições e documentos de Trabalho de Conclusão de Curso
 - **Projetos**: Gerenciamento de projetos acadêmicos, incluindo geração de pareceres
 - **Estágio**: Processamento de documentação de estágios
+- **Plano de Ensino**: Processamento de documentação relacionada aos planos de ensino
 
 ## Arquitetura
 
