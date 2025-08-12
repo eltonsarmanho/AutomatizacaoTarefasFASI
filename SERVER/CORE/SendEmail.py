@@ -85,14 +85,14 @@ def enviar_email_plano_ensino(resposta):
     """Envia um e-mail notificando sobre uma nova submissão do formulário de Plano de Ensino."""
 
     # Criar lista de anexos formatados
-    anexos = "\n".join(resposta[3:]) if len(resposta) > 9 else "Nenhum anexo enviado"
+    anexos = "\n".join(resposta[3:]) if len(resposta) > 2 else "Nenhum anexo enviado"
     body = f"""
     Olá,
 
     Uma nova submissão foi registrada no formulário de Plano de Ensino.
 
     🧑‍🏫 Docente: {resposta[1]}   
-    📆 Semestre: {resposta[8]}  
+    📆 Semestre: {resposta[2]}  
 
     📎 Anexos: 
     {anexos}
