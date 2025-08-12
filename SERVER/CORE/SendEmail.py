@@ -265,12 +265,12 @@ def enviar_email(body,nameForm,DESTINATARIOS,caminho_pdf=None):
         # Anexar o PDF gerado
         if caminho_pdf is not None:
             with open(caminho_pdf, "rb") as pdf_file:
-                part = MIMEBase("application", "octet-stream")
+                part = MIMEBase("application", "pdf")  # Especificar MIME type corretamente
                 part.set_payload(pdf_file.read())
                 encoders.encode_base64(part)
                 part.add_header(
                     "Content-Disposition",
-                    f"attachment; filename={os.path.basename(caminho_pdf)}",
+                    f"attachment; filename*=UTF-8''{os.path.basename(caminho_pdf)}",  # UTF-8 encoding no nome do arquivo
                 )
                 msg.attach(part)
 
