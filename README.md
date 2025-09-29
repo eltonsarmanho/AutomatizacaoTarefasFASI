@@ -3,6 +3,8 @@
 ## Descrição do Projeto
 
 O projeto "Automatização de Tarefas FASI" é um sistema completo para automatizar o fluxo de trabalho administrativo da Faculdade de Sistemas de Informação (FASI) da Universidade Federal do Pará, Campus Universitário de Cametá. 
+
+
 **Para desenvolvimento e testes locais apenas:**
 
 ### **1️⃣ Clone o Repositório**
