@@ -2,7 +2,185 @@
 
 ## Descrição do Projeto
 
-O projeto "Automatização de Tarefas FASI" é um sistema completo para automatizar o fluxo de trabalho administrativo da Faculdade de Sistemas de Informação (FASI) da Universidade Federal do Pará, Campus Universitário do Tocantins/Cametá. O sistema gerencia diversos processos acadêmicos, incluindo Atividades Curriculares Complementares (ACC), Trabalhos de Conclusão de Curso (TCC), Projetos Acadêmicos e Estágios.
+O projeto "Automatização de Tarefas FASI" é um sistema completo para automatizar o fluxo de trabalho administrativo da Faculdade de Sistemas de Informação (FASI) da Universidade Federal do Pará, Campus Universitário d**Para desenvolvimento e testes locais apenas:**
+
+### **1️⃣ Clone o Repositório**
+```bash
+git clone https://github.com/eltonsarmanho/AutomatizacaoTarefasFASI.git
+cd AutomatizacaoTarefasFASI
+```
+
+### **2️⃣ Criar e Ativar Ambiente Virtual**
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+```
+
+### **3️⃣ Instalar Dependências**
+```bash
+pip install -r requirements.txt
+```
+
+### **4️⃣ Configurar Variáveis de Ambiente**
+```bash
+cp LAMBDA_ENV_VARS.template.txt .env
+# Editar .env com valores reais
+```
+
+## 📡 **Configurar Webhook no Google Forms**
+
+### **Para AWS Lambda (Produção):**
+1. **No Google Sheets** vinculado ao formulário: `Extensões` → `Apps Script`
+2. **Criar função para enviar dados:**
+```javascript
+function aoSubmeterResposta(e) {
+  var urlWebhook = "https://SEU_LAMBDA_FUNCTION_URL";  // Function URL do Lambda
+  var planilha = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Respostas do formulário");
+  var ultimaLinha = planilha.getLastRow();
+  var ultimaResposta = planilha.getRange(ultimaLinha, 1, 1, planilha.getLastColumn()).getValues()[0];
+
+  var payload = {
+    "form_id": "ACC",  // Tipo: ACC, TCC, PROJETOS, ESTAGIO, PLANO_ENSINO
+    "resposta": ultimaResposta
+  };
+
+  var opcoes = {
+    "method": "post",
+    "contentType": "application/json", 
+    "payload": JSON.stringify(payload)
+  };
+
+  try {
+    var resposta = UrlFetchApp.fetch(urlWebhook, opcoes);
+    console.log("Webhook enviado com sucesso:", resposta.getContentText());
+  } catch (erro) {
+    console.error("Erro ao enviar webhook:", erro);
+  }
+}
+```
+3. **Configurar Trigger:** `Triggers` → `Add Trigger` → `On form submit`
+
+### **Para Desenvolvimento Local (Ngrok):**
+Se estiver testando localmente, use Ngrok:
+```bash
+# Instalar Ngrok
+ngrok http 5000
+
+# Usar URL gerada no Apps Script
+var urlWebhook = "https://xyz123.ngrok.io/webhook";
+```
+
+## 🔍 **Monitoramento e Troubleshooting**
+
+### **AWS CloudWatch Logs**
+```bash
+# Visualizar logs em tempo real
+aws logs tail /aws/lambda/SUA_FUNCAO_LAMBDA --follow
+
+# Filtrar por erros
+aws logs filter-log-events --log-group-name /aws/lambda/SUA_FUNCAO_LAMBDA --filter-pattern "ERROR"
+```
+
+### **Problemas Comuns e Soluções**
+
+#### **❌ Erro: "Runtime.ImportModuleError"**
+- **Causa:** Dependência não incluída no package
+- **Solução:** Executar `./create_final_package.sh` novamente
+
+#### **❌ Erro: "Read-only file system"**  
+- **Causa:** Tentativa de escrever fora do `/tmp/`
+- **Solução:** PDFs são salvos automaticamente em `/tmp/`
+
+#### **❌ Erro: "Task timed out after X seconds"**
+- **Causa:** Timeout muito baixo
+- **Solução:** Aumentar timeout para 5 minutos (300s)
+
+#### **❌ Emails não são enviados**
+- **Verificar:** Environment variables `EMAIL_SENDER` e `EMAIL_PASSWORD`
+- **Verificar:** App Password do Gmail configurado corretamente
+- **Verificar:** 2FA habilitado na conta Gmail
+
+#### **❌ PDF não é gerado**
+- **Verificar:** Layers do ReportLab e Pillow adicionados
+- **Verificar:** Logs para mensagens de erro específicas
+- **Verificar:** Formulário é do tipo "PROJETOS"
+
+### **Teste de Conectividade**
+```bash
+# Testar Function URL
+curl -X POST https://SUA_FUNCTION_URL \
+  -H "Content-Type: application/json" \
+  -d '{"form_id":"TEST","resposta":["teste"]}'
+
+# Resposta esperada: {"status": "success", "message": "..."}
+```
+
+## 📊 **Recursos e Funcionalidades**
+
+### **✅ Funcionalidades Implementadas**
+- 📧 **Envio automático de emails** para destinatários configurados
+- 📂 **Organização no Google Drive** (opcional, se credenciais fornecidas)  
+- 📄 **Geração de PDFs** para formulários de Projetos
+- 🔧 **Processamento robusto** com fallbacks e tratamento de erros
+- 🚀 **Arquitetura serverless** com alta disponibilidade
+- 📱 **Suporte a múltiplos formulários** (ACC, TCC, Projetos, Estágio, Plano de Ensino)
+
+### **🔒 Segurança**
+- ✅ **Environment Variables** para credenciais sensíveis
+- ✅ **Imports condicionais** com graceful degradation
+- ✅ **Validação de dados** de entrada
+- ✅ **Logs estruturados** para auditoria
+
+### **⚡ Performance**
+- ✅ **Processamento paralelo** com threads
+- ✅ **Layers para dependências** pesadas (Pillow, ReportLab)
+- ✅ **Timeout otimizado** (5 minutos)
+- ✅ **Memory adequada** (512MB+)
+
+## 📞 **Suporte e Contribuição**
+
+### **🐛 Reportar Bugs**
+- Criar issue no GitHub com logs do CloudWatch
+- Incluir configuração de Environment Variables (sem credenciais)
+- Descrever passos para reproduzir o problema
+
+### **🚀 Contribuir**
+1. Fork do repositório
+2. Criar branch para feature: `git checkout -b feature/nova-funcionalidade`
+3. Commit das mudanças: `git commit -m 'Add nova funcionalidade'`
+4. Push: `git push origin feature/nova-funcionalidade`
+5. Abrir Pull Request
+
+### **📋 Roadmap**
+- [ ] Dashboard web para monitoramento
+- [ ] Integração com AWS SNS para notificações
+- [ ] Suporte a anexos múltiplos
+- [ ] API REST para consultas
+- [ ] Interface administrativa
+
+---
+
+## 📄 **Licença**
+
+Este projeto está sob a licença MIT. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+## 👨‍💻 **Autor**
+
+**Elton Sarmanho Siqueira**  
+📧 Email: eltonss@ufpa.br  
+🏫 Universidade Federal do Pará - Campus Cametá  
+🎯 Faculdade de Sistemas de Informação (FASI)
+
+---
+
+⭐ **Se este projeto foi útil, considere dar uma estrela no GitHub!**á. O sistema gerencia diversos processos acadêmicos, incluindo Atividades Curriculares Complementares (ACC), Trabalhos de Conclusão de Curso (TCC), Projetos Acadêmicos e Estágios.
+
+## 🚀 **Nova Implementação AWS Lambda**
+
+Este sistema foi **migrado para AWS Lambda** para oferecer maior escalabilidade, disponibilidade e redução de custos operacionais. A nova arquitetura serverless elimina a necessidade de manter servidores, oferecendo execução sob demanda e alta disponibilidade.
 
 ## Visão Geral
 
@@ -15,27 +193,38 @@ O sistema atende a diferentes tipos de formulários e processos acadêmicos:
 - **Estágio**: Processamento de documentação de estágios
 - **Plano de Ensino**: Processamento de documentação relacionada aos planos de ensino
 
-## Arquitetura
+## 🏗️ Arquitetura AWS Lambda
 
-O sistema segue uma arquitetura modular baseada em componentes, organizada em camadas:
+O sistema utiliza uma **arquitetura serverless** baseada em AWS Lambda, oferecendo:
 
-1. **Camada de Interface (Webhook)**: 
-   - Recebe dados dos formulários Google via webhook
+### **Vantagens da Nova Arquitetura:**
+- ✅ **Zero Manutenção de Servidor**: Sem necessidade de gerenciar infraestrutura
+- ✅ **Escalabilidade Automática**: Ajuste automático conforme demanda
+- ✅ **Alta Disponibilidade**: 99.95% de uptime garantido pela AWS
+- ✅ **Custo Reduzido**: Pagamento apenas por execução (pay-per-use)
+- ✅ **Integração Nativa**: Melhor integração com outros serviços AWS
+
+### **Componentes da Arquitetura:**
+
+1. **AWS Lambda Function**: 
+   - Handler principal que recebe webhooks do Google Forms
    - Identifica o tipo de formulário e direciona para o processador adequado
+   - Utiliza layers para dependências (Pillow, ReportLab)
 
 2. **Camada de Processamento**:
    - Módulos específicos para cada tipo de formulário (ACC, TCC, Projetos, Estágio)
    - Processamento paralelo via threads para operações independentes
+   - Geração de PDFs no diretório `/tmp/` (AWS Lambda compatível)
 
 3. **Camada de Serviços**:
    - **Google Drive**: Gerenciamento e organização de anexos
-   - **Email**: Notificações automáticas para alunos, professores e administradores
-   - **PDF**: Geração de documentos formatados
+   - **Gmail SMTP**: Notificações automáticas com app passwords
+   - **PDF Generator**: Geração de documentos formatados com ReportLab
 
-4. **Camada de Utilitários**:
-   - Gerenciamento de credenciais e autenticação
-   - Leitura de planilhas Google
-   - Formatação de dados
+4. **Environment Variables**:
+   - Configuração segura via AWS Lambda Environment Variables
+   - Credenciais Google, destinatários, pareceristas
+   - Configuração de pastas do Google Drive
 
 ## Fluxo de Dados
 
@@ -93,45 +282,166 @@ O sistema segue uma arquitetura modular baseada em componentes, organizada em ca
  ┗ 📜 requirements.txt              # Dependências do projeto
 ```
 
-## Requisitos
+## 📋 Requisitos AWS Lambda
 
-### Requisitos de Sistema
-- Python 3.8 ou superior
-- Acesso à internet para comunicação com APIs Google
+### **AWS Services**
+- **AWS Lambda**: Função serverless (Python 3.11 runtime)
+- **Lambda Layers**: Para dependências pesadas
+  - Pillow Layer: `arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p311-Pillow:5`
+  - ReportLab Layer: `arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p311-reportlab:5`
 
-### Dependências Python
-- Flask: Framework web para o servidor webhook
-- gspread: Acesso à API do Google Sheets
-- google-auth, google-auth-oauthlib, google-auth-httplib2: Autenticação com serviços Google
+### **Dependências Python** (incluídas no deployment package)
+- google-auth, google-auth-oauthlib, google-auth-httplib2: Autenticação Google
 - google-api-python-client: Cliente para APIs Google
-- pandas: Manipulação e análise de dados
 - python-dotenv: Gerenciamento de variáveis de ambiente
-- reportlab: Geração de documentos PDF
+- reportlab: Geração de documentos PDF (via Layer)
+- pillow: Processamento de imagens (via Layer)
+- requests: Requisições HTTP
 
-### Requisitos de Serviços
-- **Google Cloud Console**: Conta com credenciais ativas e APIs habilitadas
+### **Serviços Externos**
+- **Google Cloud Console**: APIs habilitadas
   - Google Drive API
-  - Google Sheets API
-- **Google Forms**: Formulários configurados com coleta de respostas
-- **SMTP**: Servidor de e-mail configurado para envio de notificações
-- **Ngrok**: Para expor o webhook publicamente
+  - Google Sheets API  
+- **Google Forms**: Formulários configurados com webhooks
+- **Gmail**: App Passwords configurados para SMTP
 
-### Configuração de Ambiente
-É necessário configurar as seguintes variáveis de ambiente em um arquivo `.env`:
-```
-EMAIL_SENDER=seuemail@gmail.com
-EMAIL_PASSWORD=sua_senha_ou_app_password
-GOOGLE_CLOUD_CREDENTIALS_FASI_BASE64=credenciais_codificadas_em_base64
-DESTINATARIOS=email1@exemplo.com,email2@exemplo.com
-PARECERISTAS=Nome1:email1@exemplo.com,Nome2:email2@exemplo.com
-ACC_FOLDER_ID=id_da_pasta_acc_no_google_drive
-TCC_FOLDER_ID=id_da_pasta_tcc_no_google_drive
-PROJETOS_FOLDER_ID=id_da_pasta_projetos_no_google_drive
-ESTAGIO_FOLDER_ID=id_da_pasta_estagio_no_google_drive
-SHEET_ID=id_da_planilha_google
+## 🚀 Deployment AWS Lambda
+
+### **Passo 1: Preparar o Ambiente Local**
+
+1. **Clone o repositório:**
+```bash
+git clone https://github.com/eltonsarmanho/AutomatizacaoTarefasFASI.git
+cd AutomatizacaoTarefasFASI
 ```
 
-## 🚀 Instalação e Configuração
+2. **Criar ambiente virtual:**
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# ou
+venv\Scripts\activate     # Windows
+```
+
+3. **Instalar dependências:**
+```bash
+pip install -r requirements.txt
+```
+
+### **Passo 2: Gerar Package de Deployment**
+
+**⚠️ OBRIGATÓRIO:** O sistema inclui scripts para criar automaticamente o package de deployment.
+
+1. **Executar script de criação do package:**
+```bash
+chmod +x create_final_package.sh
+./create_final_package.sh
+```
+
+2. **Arquivos gerados:**
+- 📁 `package/`: Pasta com todas as dependências e código
+- 📦 `deployment_package.zip`: Arquivo ZIP pronto para upload no Lambda
+
+### **Passo 3: Configurar AWS Lambda**
+
+1. **Criar função Lambda:**
+   - Runtime: **Python 3.11**
+   - Handler: `lambda_function.lambda_handler`
+   - Timeout: **5 minutos** (300 segundos)
+   - Memory: **512 MB** ou mais
+
+2. **Adicionar Layers (OBRIGATÓRIO):**
+   ```
+   Pillow Layer: arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p311-Pillow:5
+   ReportLab Layer: arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p311-reportlab:5
+   ```
+
+3. **Upload do código:**
+   - Fazer upload do arquivo `deployment_package.zip`
+   - Verificar se `lambda_function.py` aparece no editor
+
+### **Passo 4: Configurar Environment Variables**
+
+Use o arquivo `LAMBDA_ENV_VARS.template.txt` como referência e configure no AWS Console:
+
+**Configuration → Environment variables → Edit:**
+
+```bash
+# E-MAIL (OBRIGATÓRIO)
+EMAIL_SENDER=fasicuntins@ufpa.br  
+EMAIL_PASSWORD=lzhg_zgwc_ihbk_ypqn  # App Password do Gmail
+
+# DESTINATÁRIOS (OBRIGATÓRIO)
+DESTINATARIOS=eltonss@ufpa.br,outrofuncionario@ufpa.br
+
+# PARECERISTAS (OBRIGATÓRIO)
+PARECERISTAS=Elton Sarmanho Siqueira:eltonss@ufpa.br,Carlos dos Santos Portela:csp@ufpa.br
+
+# GOOGLE DRIVE (OPCIONAL)
+ACC_FOLDER_ID=17GiNzOq0yWsvDNKlIx5672ya_qviGOto
+PROJETOS_FOLDER_ID=1rH_-Lsl-AwaNAOrlAemacTtp6sjBGNPJ
+TCC_FOLDER_ID=1lQmh3nV26OUsXhD118qts-QV0-vYieqR
+ESTAGIO_FOLDER_ID=1wT0wXn1bzP56h-bjy39bWv2eIhV9zdjO
+PLANO_ENSINO_FOLDER_ID=15UtPsq8vFewVE10JaGGaXiBPwuu9fhhC
+
+# GOOGLE CREDENTIALS (OPCIONAL - Para Drive)
+GOOGLE_CREDENTIALS={"type":"service_account",...}  # JSON das credenciais
+```
+
+### **Passo 5: Configurar Trigger**
+
+1. **Criar Function URL:**
+   - Configuration → Function URL → Create function URL
+   - Auth type: **NONE** (público)
+   - Copiar a URL gerada
+
+2. **Configurar webhook nos Google Forms:**
+   - Usar a Function URL como endpoint do webhook
+   - Configurar Apps Script para enviar dados para a URL
+
+### **Passo 6: Testar o Sistema**
+
+1. **Teste básico:**
+   - Enviar requisição POST para Function URL
+   - Verificar logs no CloudWatch
+
+2. **Teste completo:**
+   - Preencher um formulário Google
+   - Verificar se emails são enviados
+   - Confirmar geração de PDF (para Projetos)
+
+## 📦 Estrutura do Deployment Package
+
+Após executar `./create_final_package.sh`, a estrutura será:
+
+```
+📦 deployment_package.zip
+ ┣ 📜 lambda_function.py           # Handler principal
+ ┣ 📂 SERVER/                      # Módulos do sistema
+ ┃ ┣ 📂 CORE/
+ ┃ ┃ ┣ 📜 SendEmail.py            # Sistema de emails
+ ┃ ┃ ┣ 📜 PDFGenerator.py         # Geração de PDFs
+ ┃ ┃ ┗ 📜 GoogleDriveDownloader.py # Google Drive
+ ┃ ┗ 📂 UTIL/
+ ┃   ┗ 📜 GoogleSheetsReader.py   # Leitura de planilhas
+ ┗ 📂 [dependências]              # Bibliotecas Python
+   ┣ 📂 google/                   # APIs Google  
+   ┣ 📂 requests/                 # Requisições HTTP
+   ┣ 📂 dotenv/                   # Variáveis ambiente
+   ┗ ... (outras dependências)
+```
+
+## 🔄 Atualizar Deployment
+
+**Para mudanças no código:**
+1. Modificar arquivos Python
+2. Executar: `./create_final_package.sh`
+3. Upload do novo `deployment_package.zip`
+
+**Para mudanças nas variáveis:**
+- Apenas alterar no AWS Console (não precisa recriar package)
+
+## ⚡ Instalação e Configuração (Desenvolvimento Local)
 
 ### **1️⃣ Pré-requisitos**
 - Python 3.8+  
