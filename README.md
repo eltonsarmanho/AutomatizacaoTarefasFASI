@@ -179,7 +179,9 @@ Este projeto está sob a licença MIT. Consulte o arquivo [LICENSE](LICENSE) par
 
 ---
 
-⭐ **Se este projeto foi útil, considere dar uma estrela no GitHub!**á. O sistema gerencia diversos processos acadêmicos, incluindo Atividades Curriculares Complementares (ACC), Trabalhos de Conclusão de Curso (TCC), Projetos Acadêmicos e Estágios.
+⭐ **Se este projeto foi útil, considere dar uma estrela no GitHub!**. 
+
+O sistema gerencia diversos processos acadêmicos, incluindo Atividades Curriculares Complementares (ACC), Trabalhos de Conclusão de Curso (TCC), Projetos Acadêmicos e Estágios.
 
 ## 🚀 **Nova Implementação AWS Lambda**
 
@@ -204,7 +206,7 @@ O sistema utiliza uma **arquitetura serverless** baseada em AWS Lambda, oferecen
 - ✅ **Zero Manutenção de Servidor**: Sem necessidade de gerenciar infraestrutura
 - ✅ **Escalabilidade Automática**: Ajuste automático conforme demanda
 - ✅ **Alta Disponibilidade**: 99.95% de uptime garantido pela AWS
-- ✅ **Custo Reduzido**: Pagamento apenas por execução (pay-per-use)
+- ✅ **Custo Reduzido**: Pagamento apenas por execução (pay-per-use). AWS Lambda não é totalmente gratuito; ela oferece um nível gratuito que permite 1 milhão de solicitações e até 400.000 GB/segundos de tempo de computação por mês sem custo
 - ✅ **Integração Nativa**: Melhor integração com outros serviços AWS
 
 ### **Componentes da Arquitetura:**
@@ -236,7 +238,7 @@ O sistema utiliza uma **arquitetura serverless** baseada em AWS Lambda, oferecen
    - O script Apps Script do Google Sheets envia os dados para o webhook
 
 2. **Processamento**:
-   - O servidor Flask recebe os dados via webhook
+   - A função AWS Lambda recebe os dados via webhook
    - Identifica o tipo de formulário e direciona para o processador específico
    - Extrai informações relevantes (nome, matrícula, links de anexos, etc.)
 
@@ -259,8 +261,8 @@ O sistema utiliza uma **arquitetura serverless** baseada em AWS Lambda, oferecen
 - **Notificações Personalizadas**: Envia e-mails formatados com informações relevantes para os destinatários apropriados
 - **Geração de Documentos**: Cria PDFs formatados para pareceres e outros documentos oficiais
 - **Processamento Paralelo**: Utiliza threads para executar operações independentes simultaneamente
-- **Segurança de Credenciais**: Gerencia credenciais de forma segura usando codificação Base64
-- **Webhook Público**: Utiliza Ngrok para disponibilizar o webhook publicamente
+- **Segurança de Credenciais**: Gerencia credenciais de forma segura via Environment Variables
+- **Webhook Público**: AWS Lambda Function URL para receber webhooks publicamente
 
 ## Estrutura do Projeto
 
@@ -494,7 +496,7 @@ ngrok config add-authtoken SEU_AUTHTOKEN
 (O token pode ser encontrado em [dashboard.ngrok.com](https://dashboard.ngrok.com))
 
 ### **3️⃣ Executar o Ngrok**
-Agora, execute o **Ngrok** para expor seu servidor Flask (Porta 5000):
+Para desenvolvimento local, execute o **Ngrok** para expor seu servidor local (Porta 5000):
 ```bash
 ngrok http 5000
 ```
@@ -527,11 +529,11 @@ function aoSubmeterResposta(e) {
 3. Salve e configure para rodar **ao enviar o formulário** (`Triggers` → `OnFormSubmit`).
 
 ## 📌 **Execução do Projeto**
-### **1️⃣ Iniciar o Servidor**
+### **1️⃣ Iniciar o Servidor (Desenvolvimento Local)**
 ```bash
 python ACCFormProcessor.py
 ```
-📌 Isso inicia um servidor Flask que recebe as respostas do **Google Forms**.
+📌 **NOTA:** Este comando é apenas para desenvolvimento local. Em produção, use AWS Lambda conforme descrito nas seções anteriores.
 
 ### **2️⃣ Expor o Webhook Publicamente**
 Em um **terminal separado**, rode:
