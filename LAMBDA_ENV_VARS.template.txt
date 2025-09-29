@@ -1,0 +1,36 @@
+# 🔧 TEMPLATE PARA CONFIGURAÇÃO DAS ENVIRONMENT VARIABLES NO AWS LAMBDA
+
+## Vá em: AWS Console → Lambda → sua função → Configuration → Environment variables
+
+## 📧 EMAIL (OBRIGATÓRIO):
+EMAIL_SENDER=seu_email@ufpa.br
+EMAIL_PASSWORD=sua_senha_app_gmail
+
+## 👥 DESTINATÁRIOS (OBRIGATÓRIO):
+DESTINATARIOS=destinatario1@ufpa.br,destinatario2@ufpa.br
+
+## 👨‍🏫 PARECERISTAS (OBRIGATÓRIO):
+PARECERISTAS=Nome Completo:email@ufpa.br,Outro Nome:outro@ufpa.br
+
+## 📁 GOOGLE DRIVE FOLDERS (OPCIONAL):
+ACC_FOLDER_ID=sua_folder_id_acc
+PROJETOS_FOLDER_ID=sua_folder_id_projetos
+TCC_FOLDER_ID=sua_folder_id_tcc
+ESTAGIO_FOLDER_ID=sua_folder_id_estagio
+PLANO_ENSINO_FOLDER_ID=sua_folder_id_plano
+
+## 🔐 GOOGLE CREDENTIALS (OPCIONAL - Para Google Drive):
+GOOGLE_CREDENTIALS={"type":"service_account","project_id":"seu_projeto",...}
+
+## ⚠️ IMPORTANTE:
+## 1. NÃO use aspas nas Environment Variables do Lambda
+## 2. EMAIL_PASSWORD deve ser um App Password válido do Gmail
+## 3. Certifique-se de que 2FA está ativado na conta do Gmail
+## 4. As variáveis GOOGLE_ são opcionais (só para Google Drive)
+## 5. NUNCA commite o arquivo real com credenciais!
+
+## 📝 INSTRUÇÕES:
+## 1. Copie este template para LAMBDA_ENV_VARS.txt
+## 2. Substitua os valores pelos reais
+## 3. Configure as variáveis no AWS Lambda Console
+## 4. O arquivo real está no .gitignore para segurança
