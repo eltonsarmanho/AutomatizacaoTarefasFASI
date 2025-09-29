@@ -268,20 +268,26 @@ O sistema utiliza uma **arquitetura serverless** baseada em AWS Lambda, oferecen
 
 ```
 📦 AutomatizacaoTarefasFASI
- ┣ 📂 Arquivos                      # Diretório para armazenamento temporário de arquivos
- ┣ 📂 Keys                          # Armazena chaves de API e credenciais
- ┣ 📂 SERVER
+ ┣ 📂 SERVER                        # Módulos do sistema
  ┃ ┣ 📂 CORE                        # Componentes principais do sistema
  ┃ ┃ ┣ 📜 GoogleDriveDownloader.py  # Gerenciamento de arquivos no Google Drive
  ┃ ┃ ┣ 📜 PDFGenerator.py           # Geração de documentos PDF
- ┃ ┃ ┗ 📜 SendEmail.py              # Envio de e-mails automatizados
- ┃ ┗ 📂 UTIL                        # Utilitários e ferramentas auxiliares
- ┃   ┣ 📜 CredentialsEncoder.py     # Codificação/decodificação de credenciais
- ┃   ┗ 📜 GoogleSheetsReader.py     # Leitura de dados do Google Sheets
+ ┃ ┃ ┣ 📜 SendEmail.py              # Envio de e-mails automatizados
+ ┃ ┃ ┗ 📜 __init__.py               # Inicialização do módulo CORE
+ ┃ ┣ 📂 UTIL                        # Utilitários e ferramentas auxiliares
+ ┃ ┃ ┣ 📜 CredentialsEncoder.py     # Codificação/decodificação de credenciais
+ ┃ ┃ ┗ 📜 GoogleSheetsReader.py     # Leitura de dados do Google Sheets
+ ┃ ┗ 📜 __init__.py                 # Inicialização do módulo SERVER
  ┣ 📂 TEST                          # Testes unitários e de integração
- ┃ ┗ 📜 test_pdf_generator.py       # Testes para o gerador de PDF
+ ┃ ┣ 📜 test_pdf_generator.py       # Testes para o gerador de PDF
+ ┃ ┗ 📜 test_real_data.py           # Testes com dados reais
+ ┣ 📂 package_final/                # Package de deployment gerado automaticamente
  ┣ 📜 .gitignore                    # Arquivos e diretórios ignorados pelo Git
- ┣ 📜 ACCFormProcessor.py           # Processador principal de formulários
+ ┣ 📜 ACCFormProcessor.py           # Processador principal (desenvolvimento local)
+ ┣ 📜 lambda_function.py            # Handler principal AWS Lambda
+ ┣ 📜 create_final_package.sh       # Script para gerar deployment package
+ ┣ 📜 deployment_package_final.zip  # Package pronto para deploy AWS Lambda
+ ┣ 📜 LAMBDA_ENV_VARS.template.txt  # Template para Environment Variables
  ┣ 📜 LICENSE                       # Licença do projeto
  ┣ 📜 README.md                     # Documentação do projeto
  ┗ 📜 requirements.txt              # Dependências do projeto
@@ -344,8 +350,8 @@ chmod +x create_final_package.sh
 ```
 
 2. **Arquivos gerados:**
-- 📁 `package/`: Pasta com todas as dependências e código
-- 📦 `deployment_package.zip`: Arquivo ZIP pronto para upload no Lambda
+- 📁 `package_final/`: Pasta com todas as dependências e código
+- 📦 `deployment_package_final.zip`: Arquivo ZIP pronto para upload no Lambda
 
 ### **Passo 3: Configurar AWS Lambda**
 
@@ -362,7 +368,7 @@ chmod +x create_final_package.sh
    ```
 
 3. **Upload do código:**
-   - Fazer upload do arquivo `deployment_package.zip`
+   - Fazer upload do arquivo `deployment_package_final.zip`
    - Verificar se `lambda_function.py` aparece no editor
 
 ### **Passo 4: Configurar Environment Variables**
@@ -420,19 +426,24 @@ GOOGLE_CREDENTIALS={"type":"service_account",...}  # JSON das credenciais
 Após executar `./create_final_package.sh`, a estrutura será:
 
 ```
-📦 deployment_package.zip
- ┣ 📜 lambda_function.py           # Handler principal
+📦 deployment_package_final.zip
+ ┣ 📜 lambda_function.py           # Handler principal AWS Lambda
  ┣ 📂 SERVER/                      # Módulos do sistema
  ┃ ┣ 📂 CORE/
  ┃ ┃ ┣ 📜 SendEmail.py            # Sistema de emails
  ┃ ┃ ┣ 📜 PDFGenerator.py         # Geração de PDFs
- ┃ ┃ ┗ 📜 GoogleDriveDownloader.py # Google Drive
- ┃ ┗ 📂 UTIL/
- ┃   ┗ 📜 GoogleSheetsReader.py   # Leitura de planilhas
+ ┃ ┃ ┣ 📜 GoogleDriveDownloader.py # Google Drive
+ ┃ ┃ ┗ � __init__.py             # Inicialização módulo
+ ┃ ┣ �📂 UTIL/
+ ┃ ┃ ┣ 📜 GoogleSheetsReader.py   # Leitura de planilhas
+ ┃ ┃ ┗ 📜 CredentialsEncoder.py   # Codificação de credenciais
+ ┃ ┗ 📜 __init__.py               # Inicialização módulo
  ┗ 📂 [dependências]              # Bibliotecas Python
    ┣ 📂 google/                   # APIs Google  
    ┣ 📂 requests/                 # Requisições HTTP
    ┣ 📂 dotenv/                   # Variáveis ambiente
+   ┣ 📂 cachetools/               # Cache para autenticação
+   ┣ 📂 googleapis_common_protos/ # Protocolos Google
    ┗ ... (outras dependências)
 ```
 
@@ -441,7 +452,7 @@ Após executar `./create_final_package.sh`, a estrutura será:
 **Para mudanças no código:**
 1. Modificar arquivos Python
 2. Executar: `./create_final_package.sh`
-3. Upload do novo `deployment_package.zip`
+3. Upload do novo `deployment_package_final.zip`
 
 **Para mudanças nas variáveis:**
 - Apenas alterar no AWS Console (não precisa recriar package)
