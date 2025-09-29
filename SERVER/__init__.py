@@ -1,0 +1,1 @@
+# Pacote SERVER para AWS Lambda

@@ -7,7 +7,23 @@ from datetime import datetime
 import locale
 from email.mime.base import MIMEBase
 from email import encoders
-from CORE.PDFGenerator import gerar_pdf_projetos
+
+# Importação condicional para evitar erro no AWS Lambda
+try:
+    from SERVER.CORE.PDFGenerator import gerar_pdf_projetos
+    PDF_AVAILABLE = True
+except ImportError as e:
+    try:
+        # Fallback para desenvolvimento local
+        from CORE.PDFGenerator import gerar_pdf_projetos
+        PDF_AVAILABLE = True
+    except ImportError as e2:
+        print(f"⚠️ PDFGenerator não disponível: {e} / {e2}")
+        PDF_AVAILABLE = False
+        
+        def gerar_pdf_projetos(resposta):
+            print("⚠️ PDF Generator não está disponível. PDF não será gerado.")
+            return None
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv(override=True)
@@ -77,7 +93,15 @@ def enviar_email_projetos(resposta):
     DESTINATARIOS.append(email1)
     DESTINATARIOS.append(email2)
 
-    caminho_pdf = gerar_pdf_projetos(resposta)
+    # Gerar PDF apenas se disponível
+    if PDF_AVAILABLE:
+        try:
+            caminho_pdf = gerar_pdf_projetos(resposta)
+        except Exception as e:
+            print(f"❌ Erro ao gerar PDF: {e}")
+            caminho_pdf = None
+    else:
+        caminho_pdf = None
     
     enviar_email(body=body,nameForm='Projetos',DESTINATARIOS=DESTINATARIOS,caminho_pdf=caminho_pdf)
 

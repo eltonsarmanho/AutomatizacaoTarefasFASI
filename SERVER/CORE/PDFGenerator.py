@@ -10,7 +10,11 @@ def gerar_pdf_projetos(resposta):
     """Gera um PDF contendo as informações do formulário de Projetos, ajustando o conteúdo conforme Natureza e Solicitação."""
     
     nome_arquivo = f"Parecer_{resposta[1].replace(' ', '_')}.pdf"
-    caminho_pdf = os.path.join( nome_arquivo)  # Salvar no diretório temporário
+    # Usar /tmp para AWS Lambda, diretório atual para desenvolvimento local
+    if os.path.exists('/tmp'):
+        caminho_pdf = os.path.join('/tmp', nome_arquivo)
+    else:
+        caminho_pdf = nome_arquivo
 
     # Configuração do PDF
     largura, altura = A4

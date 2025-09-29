@@ -11,3 +11,7 @@ Util/__pycache__/GoogleDriveDownloader.cpython-311.pyc
 .idea/misc.xml
 my_env/
 __pycache__
+package_final/
+*.sh
+*.zip
+LAMBDA_ENV_VARS.txt

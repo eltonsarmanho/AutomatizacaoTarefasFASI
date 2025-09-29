@@ -1,4 +1,3 @@
-import pandas as pd
 import os
 import sys
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -63,23 +62,6 @@ def baixar_arquivo_google_drive(link_drive):
 
     print(f"✅ Arquivo baixado: {nome_arquivo}")
 
-def baixar_arquivos_do_csv(CSV_FILE = "respostas.csv"):
-    """Lê um CSV e baixa os arquivos listados na coluna 'Link do Arquivo'."""
-    caminho_completo = os.path.abspath(CSV_FILE)
-
-    if not os.path.exists(caminho_completo):
-        print("❌ Arquivo CSV não encontrado!")
-        return
-
-    df = pd.read_csv(caminho_completo)
-
-    if "Link do Arquivo" not in df.columns:
-        print("❌ Coluna 'Link do Arquivo' não encontrada no CSV!")
-        return
-
-    for index, row in df.iterrows():
-        link_drive = row["Link do Arquivo"]
-        baixar_arquivo_google_drive(link_drive)
 
 def retry_api_call(func, retries=3, delay_base=2):
     """
