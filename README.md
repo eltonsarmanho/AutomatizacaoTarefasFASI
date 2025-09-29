@@ -287,6 +287,7 @@ O sistema utiliza uma **arquitetura serverless** baseada em AWS Lambda, oferecen
  ┣ 📜 lambda_function.py            # Handler principal AWS Lambda
  ┣ 📜 create_final_package.sh       # Script para gerar deployment package
  ┣ 📜 deployment_package_final.zip  # Package pronto para deploy AWS Lambda
+ ┣ 📜 DEPLOYMENT_GUIDE.md           # Guia detalhado de deployment
  ┣ 📜 LAMBDA_ENV_VARS.template.txt  # Template para Environment Variables
  ┣ 📜 LICENSE                       # Licença do projeto
  ┣ 📜 README.md                     # Documentação do projeto
@@ -449,6 +450,10 @@ Após executar `./create_final_package.sh`, a estrutura será:
 
 ## 🔄 Atualizar Deployment
 
+**📚 Para instruções detalhadas, consulte:** [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+
+### **Resumo Rápido:**
+
 **Para mudanças no código:**
 1. Modificar arquivos Python
 2. Executar: `./create_final_package.sh`
@@ -456,6 +461,11 @@ Após executar `./create_final_package.sh`, a estrutura será:
 
 **Para mudanças nas variáveis:**
 - Apenas alterar no AWS Console (não precisa recriar package)
+
+**Para novas bibliotecas:**
+1. Adicionar ao `requirements.txt`
+2. Executar: `./create_final_package.sh`
+3. Upload do novo package
 
 ## ⚡ Instalação e Configuração (Desenvolvimento Local)
 
