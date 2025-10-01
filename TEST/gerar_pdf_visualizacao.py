@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Script para gerar PDFs de amostra para visualização
+Demonstra a geração condicional de declaração apenas para projetos de Extensão
 """
 import os
 import sys
@@ -18,8 +19,8 @@ from SERVER.CORE.PDFGenerator import (
 def gerar_pdfs_exemplo():
     """Gera PDFs de exemplo com dados fictícios"""
     
-    # Dados de exemplo
-    resposta_exemplo = [
+    # Exemplo 1: Projeto de Extensão (gera AMBOS os PDFs)
+    resposta_extensao = [
         "0",  # índice 0 não utilizado
         "Elton Sarmanho Siqueira",  # docente
         "Allan Barbosa Costa",  # parecerista_1
@@ -32,30 +33,69 @@ def gerar_pdfs_exemplo():
         "Novo",  # solicitacao
     ]
     
+    # Exemplo 2: Projeto de Pesquisa (gera APENAS Parecer)
+    resposta_pesquisa = [
+        "0",
+        "Maria Silva Santos",
+        "João Oliveira",
+        "Ana Paula Costa",
+        "Análise de Algoritmos de Machine Learning para Detecção de Fraudes",
+        "160",
+        "PIBIC-CNPq",
+        "Pesquisa",  # natureza
+        "2025",
+        "Renovação",
+    ]
+    
     print("🔄 Gerando PDFs de exemplo...")
+    print("=" * 70)
     print()
     
-    # Gerar PDF de parecer
+    # EXEMPLO 1: EXTENSÃO
+    print("📌 EXEMPLO 1: Projeto de EXTENSÃO (Parecer + Declaração)")
+    print("-" * 70)
     try:
-        caminho_parecer = gerar_pdf_projetos(resposta_exemplo)
-        print(f"✅ PDF de Parecer gerado:")
-        print(f"   {caminho_parecer}")
-        print()
+        caminho_parecer = gerar_pdf_projetos(resposta_extensao)
+        print(f"✅ Parecer: {caminho_parecer}")
     except Exception as e:
         print(f"❌ Erro ao gerar PDF de parecer: {e}")
-        print()
     
-    # Gerar PDF de declaração
+    # Gerar declaração apenas para Extensão
+    if resposta_extensao[7].strip().lower() == "extensão":
+        try:
+            caminho_declaracao = gerar_pdf_declaracao_projeto(resposta_extensao)
+            print(f"✅ Declaração: {caminho_declaracao}")
+        except Exception as e:
+            print(f"❌ Erro ao gerar PDF de declaração: {e}")
+    
+    print()
+    
+    # EXEMPLO 2: PESQUISA
+    print("📌 EXEMPLO 2: Projeto de PESQUISA (Apenas Parecer)")
+    print("-" * 70)
     try:
-        caminho_declaracao = gerar_pdf_declaracao_projeto(resposta_exemplo)
-        print(f"✅ PDF de Declaração gerado:")
-        print(f"   {caminho_declaracao}")
-        print()
+        caminho_parecer2 = gerar_pdf_projetos(resposta_pesquisa)
+        print(f"✅ Parecer: {caminho_parecer2}")
     except Exception as e:
-        print(f"❌ Erro ao gerar PDF de declaração: {e}")
-        print()
+        print(f"❌ Erro ao gerar PDF de parecer: {e}")
     
+    # Não gera declaração para Pesquisa
+    if resposta_pesquisa[7].strip().lower() == "extensão":
+        try:
+            caminho_declaracao2 = gerar_pdf_declaracao_projeto(resposta_pesquisa)
+            print(f"✅ Declaração: {caminho_declaracao2}")
+        except Exception as e:
+            print(f"❌ Erro ao gerar PDF de declaração: {e}")
+    else:
+        print("ℹ️  Declaração NÃO gerada (natureza != Extensão)")
+    
+    print()
+    print("=" * 70)
     print("✨ Concluído! Abra os arquivos para visualizar.")
+    print()
+    print("📋 Regra implementada:")
+    print("   • Extensão → Parecer + Declaração")
+    print("   • Pesquisa/Ensino/Outros → Apenas Parecer")
 
 
 if __name__ == "__main__":

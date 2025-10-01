@@ -103,10 +103,13 @@ def enviar_email_projetos(resposta):
             caminhos_pdf.append(gerar_pdf_projetos(resposta))
         except Exception as e:
             print(f"❌ Erro ao gerar PDF Parecer: {e}")
-        try:
-            caminhos_pdf.append(gerar_pdf_declaracao_projeto(resposta))
-        except Exception as e:
-            print(f"❌ Erro ao gerar PDF Declaração: {e}")
+        
+        # Gerar PDF de declaração apenas para projetos de Extensão
+        if resposta[7].strip().lower() == "extensão":
+            try:
+                caminhos_pdf.append(gerar_pdf_declaracao_projeto(resposta))
+            except Exception as e:
+                print(f"❌ Erro ao gerar PDF Declaração: {e}")
 
     caminhos_pdf = [caminho for caminho in caminhos_pdf if caminho]
 
