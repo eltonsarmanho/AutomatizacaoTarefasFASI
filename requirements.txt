@@ -5,3 +5,4 @@ google-api-python-client
 python-dotenv
 reportlab
 Pillow==10.4.0
+PyPDF2==3.0.1

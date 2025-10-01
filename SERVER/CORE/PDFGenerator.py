@@ -6,15 +6,58 @@ import os
 import locale
 from datetime import datetime
 
+
+def _resolver_caminho_pdf(nome_arquivo):
+    """Resolve o caminho adequado do PDF (usa /tmp no Lambda)."""
+    if os.path.exists('/tmp'):
+        return os.path.join('/tmp', nome_arquivo)
+    return nome_arquivo
+
+
+def _obter_fontes_padrao():
+    """Retorna fontes normal e bold registradas com suporte a UTF-8."""
+    fonte_normal = 'Helvetica'
+    fonte_bold = 'Helvetica-Bold'
+
+    try:
+        font_paths = [
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+            '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+            '/usr/share/fonts/TTF/arial.ttf',
+            '/System/Library/Fonts/Arial.ttf',
+            'C\\Windows\\Fonts\\arial.ttf',
+        ]
+
+        font_bold_paths = [
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+            '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
+            '/usr/share/fonts/TTF/arialbd.ttf',
+            '/System/Library/Fonts/Arial Bold.ttf',
+            'C\\Windows\\Fonts\\arialbd.ttf',
+        ]
+
+        for font_path in font_paths:
+            if os.path.exists(font_path):
+                pdfmetrics.registerFont(TTFont('UTF8-Regular', font_path))
+                fonte_normal = 'UTF8-Regular'
+                break
+
+        for font_path in font_bold_paths:
+            if os.path.exists(font_path):
+                pdfmetrics.registerFont(TTFont('UTF8-Bold', font_path))
+                fonte_bold = 'UTF8-Bold'
+                break
+
+    except Exception as e:
+        print(f"Aviso: Não foi possível carregar fontes UTF-8: {e}")
+
+    return fonte_normal, fonte_bold
+
 def gerar_pdf_projetos(resposta):
     """Gera um PDF contendo as informações do formulário de Projetos, ajustando o conteúdo conforme Natureza e Solicitação."""
     
     nome_arquivo = f"Parecer_{resposta[1].replace(' ', '_')}.pdf"
-    # Usar /tmp para AWS Lambda, diretório atual para desenvolvimento local
-    if os.path.exists('/tmp'):
-        caminho_pdf = os.path.join('/tmp', nome_arquivo)
-    else:
-        caminho_pdf = nome_arquivo
+    caminho_pdf = _resolver_caminho_pdf(nome_arquivo)
 
     # Configuração do PDF
     largura, altura = A4
@@ -25,48 +68,9 @@ def gerar_pdf_projetos(resposta):
 
     # Criar canvas com encoding UTF-8 e configuração de fontes melhorada
     c = canvas.Canvas(caminho_pdf, pagesize=A4)
-    
-    # Configurar fontes que suportam caracteres especiais
-    # Tentar múltiplas opções de fontes comuns no Linux
-    fonte_normal = 'Helvetica'
-    fonte_bold = 'Helvetica-Bold'
-    
-    try:
-        # Opções de fontes TrueType comuns no Linux que suportam UTF-8
-        font_paths = [
-            '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-            '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
-            '/usr/share/fonts/TTF/arial.ttf',
-            '/System/Library/Fonts/Arial.ttf',  # macOS
-            'C:\\Windows\\Fonts\\arial.ttf'     # Windows
-        ]
-        
-        font_bold_paths = [
-            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
-            '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
-            '/usr/share/fonts/TTF/arialbd.ttf',
-            '/System/Library/Fonts/Arial Bold.ttf',  # macOS
-            'C:\\Windows\\Fonts\\arialbd.ttf'        # Windows
-        ]
-        
-        # Tentar registrar uma fonte que suporte UTF-8
-        for font_path in font_paths:
-            if os.path.exists(font_path):
-                pdfmetrics.registerFont(TTFont('UTF8-Regular', font_path))
-                fonte_normal = 'UTF8-Regular'
-                break
-                
-        for font_path in font_bold_paths:
-            if os.path.exists(font_path):
-                pdfmetrics.registerFont(TTFont('UTF8-Bold', font_path))
-                fonte_bold = 'UTF8-Bold'
-                break
-                
-    except Exception as e:
-        print(f"Aviso: Não foi possível carregar fontes UTF-8: {e}")
-        # Usar fontes padrão como fallback
-        pass
-    
+
+    fonte_normal, fonte_bold = _obter_fontes_padrao()
+
     c.setFont(fonte_normal, 12)
 
     # Variáveis do formulário - garantir encoding correto
@@ -128,6 +132,78 @@ def gerar_pdf_projetos(resposta):
 
     c.save()
     return caminho_pdf  # Retorna o caminho do PDF gerado
+
+
+def gerar_pdf_declaracao_projeto(resposta):
+    """Gera um PDF de declaração para o formulário de Projetos."""
+
+    docente = str(resposta[1]).encode('utf-8', 'replace').decode('utf-8')
+    projeto = str(resposta[4]).encode('utf-8', 'replace').decode('utf-8')
+
+    nome_arquivo = f"Declaracao_{projeto.replace(' ', '_')}.pdf"
+    caminho_pdf = _resolver_caminho_pdf(nome_arquivo)
+
+    largura, altura = A4
+    margem_esquerda = 80
+    margem_direita = largura - 80
+    largura_texto = margem_direita - margem_esquerda
+
+    c = canvas.Canvas(caminho_pdf, pagesize=A4)
+    fonte_normal, fonte_bold = _obter_fontes_padrao()
+
+    # Cabeçalho
+    y_pos = altura - 60
+    c.setFont(fonte_bold, 12)
+    cabecalho = [
+        "SERVIÇO PÚBLICO FEDERAL",
+        "UNIVERSIDADE FEDERAL DO PARÁ",
+        "CAMPUS UNIVERSITÁRIO DO TOCANTINS/CAMETÁ",
+        "FACULDADE DE SISTEMAS DE INFORMAÇÃO",
+    ]
+    for linha in cabecalho:
+        c.drawCentredString(largura / 2, y_pos, linha)
+        y_pos -= 15
+
+    c.line(margem_esquerda, y_pos, margem_direita, y_pos)
+    y_pos -= 40
+
+    # Título
+    c.setFont(fonte_bold, 14)
+    c.drawCentredString(largura / 2, y_pos, "DECLARAÇÃO")
+    y_pos -= 40
+
+    # Corpo do texto
+    c.setFont(fonte_normal, 12)
+    texto_declaracao = (
+        "A Direção da Faculdade de Sistemas de Informação declara que o Programa de Extensão "
+        f"intitulado {projeto} sob a coordenação do professor {docente} está em consonância com as "
+        "diretrizes do Projeto Pedagógico do Curso de Sistemas de Informação, assim como é relevante nas "
+        "atividades desenvolvidas dentro dos eixos teóricos e práticos do referido curso."
+    )
+
+    y_pos = desenhar_texto_justificado(c, texto_declaracao, margem_esquerda, y_pos, largura_texto, fonte_normal)
+    y_pos -= 40
+
+    c.drawString(margem_esquerda, y_pos, "Atenciosamente,")
+    y_pos -= 60
+
+    c.drawRightString(margem_direita, y_pos, f"Cametá, {obter_data_extenso()}")
+    y_pos -= 80
+
+    c.setFont(fonte_bold, 10)
+    c.drawCentredString(largura / 2, y_pos, "Prof. Dr. Elton Sarmanho Siqueira / Prof. Dr. Carlos dos Santos Portela")
+    y_pos -= 15
+    c.setFont(fonte_normal, 9)
+    c.drawCentredString(largura / 2, y_pos, "Diretor da Faculdade de Sistemas de Informação / Vice-Diretor da Faculdade de Sistemas de Informação")
+    y_pos -= 12
+    c.drawCentredString(largura / 2, y_pos, "PORTARIA Nº 3686/2024 – REITORIA-UFPA / PORTARIA Nº 332/2024 – REITORIA-UFPA")
+    y_pos -= 12
+    c.drawCentredString(largura / 2, y_pos, "Trav. Padre Antônio Franco, 2617-Matinha")
+    y_pos -= 12
+    c.drawCentredString(largura / 2, y_pos, "Cametá-Pará- CEP:68400-000-Fone:3781-1182/1258")
+
+    c.save()
+    return caminho_pdf
 
 def desenhar_texto_justificado(c, texto, x, y, largura_texto, fonte_normal):
     """Desenha um parágrafo de texto justificado no PDF, evitando palavras grudadas."""
@@ -201,6 +277,29 @@ def gerar_texto_parecer(natureza, solicitacao, docente, parecerista_1, pareceris
 
     
     return parecer_base
+
+MESES_PT = {
+    1: "janeiro",
+    2: "fevereiro",
+    3: "março",
+    4: "abril",
+    5: "maio",
+    6: "junho",
+    7: "julho",
+    8: "agosto",
+    9: "setembro",
+    10: "outubro",
+    11: "novembro",
+    12: "dezembro",
+}
+
+
+def obter_data_extenso():
+    """Retorna a data atual por extenso em português."""
+    agora = datetime.now()
+    mes = MESES_PT.get(agora.month, "")
+    return f"{agora.day:02d} de {mes} de {agora.year}"
+
 
 def obter_data_formatada():
     """Retorna a data atual formatada corretamente em português."""

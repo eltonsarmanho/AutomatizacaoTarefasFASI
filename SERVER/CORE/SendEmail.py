@@ -10,19 +10,23 @@ from email import encoders
 
 # Importação condicional para evitar erro no AWS Lambda
 try:
-    from SERVER.CORE.PDFGenerator import gerar_pdf_projetos
+    from SERVER.CORE.PDFGenerator import gerar_pdf_projetos, gerar_pdf_declaracao_projeto
     PDF_AVAILABLE = True
 except ImportError as e:
     try:
         # Fallback para desenvolvimento local
-        from CORE.PDFGenerator import gerar_pdf_projetos
+        from CORE.PDFGenerator import gerar_pdf_projetos, gerar_pdf_declaracao_projeto
         PDF_AVAILABLE = True
     except ImportError as e2:
         print(f"⚠️ PDFGenerator não disponível: {e} / {e2}")
         PDF_AVAILABLE = False
-        
+
         def gerar_pdf_projetos(resposta):
             print("⚠️ PDF Generator não está disponível. PDF não será gerado.")
+            return None
+
+        def gerar_pdf_declaracao_projeto(resposta):
+            print("⚠️ PDF Generator não está disponível. PDF de declaração não será gerado.")
             return None
 
 # Carregar variáveis de ambiente do arquivo .env
@@ -93,17 +97,25 @@ def enviar_email_projetos(resposta):
     DESTINATARIOS.append(email1)
     DESTINATARIOS.append(email2)
 
-    # Gerar PDF apenas se disponível
+    caminhos_pdf = []
     if PDF_AVAILABLE:
         try:
-            caminho_pdf = gerar_pdf_projetos(resposta)
+            caminhos_pdf.append(gerar_pdf_projetos(resposta))
         except Exception as e:
-            print(f"❌ Erro ao gerar PDF: {e}")
-            caminho_pdf = None
-    else:
-        caminho_pdf = None
-    
-    enviar_email(body=body,nameForm='Projetos',DESTINATARIOS=DESTINATARIOS,caminho_pdf=caminho_pdf)
+            print(f"❌ Erro ao gerar PDF Parecer: {e}")
+        try:
+            caminhos_pdf.append(gerar_pdf_declaracao_projeto(resposta))
+        except Exception as e:
+            print(f"❌ Erro ao gerar PDF Declaração: {e}")
+
+    caminhos_pdf = [caminho for caminho in caminhos_pdf if caminho]
+
+    enviar_email(
+        body=body,
+        nameForm='Projetos',
+        DESTINATARIOS=DESTINATARIOS,
+        caminhos_pdf=caminhos_pdf if caminhos_pdf else None,
+    )
 
 def enviar_email_plano_ensino(resposta):
     """Envia um e-mail notificando sobre uma nova submissão do formulário de Plano de Ensino."""
@@ -269,7 +281,7 @@ def enviar_email_estagio(resposta):
 
 
 
-def enviar_email(body,nameForm,DESTINATARIOS,caminho_pdf=None):
+def enviar_email(body,nameForm,DESTINATARIOS,caminhos_pdf=None):
     """Envia um e-mail notificando os destinatários sobre uma nova resposta."""
     try:
         # Verifica se as credenciais foram carregadas corretamente
@@ -286,15 +298,21 @@ def enviar_email(body,nameForm,DESTINATARIOS,caminho_pdf=None):
         
         msg.attach(MIMEText(body, "plain"))
 
-        # Anexar o PDF gerado
-        if caminho_pdf is not None:
+        # Anexar os PDFs gerados
+        pdf_paths = []
+        if isinstance(caminhos_pdf, (list, tuple, set)):
+            pdf_paths = [caminho for caminho in caminhos_pdf if caminho]
+        elif caminhos_pdf:
+            pdf_paths = [caminhos_pdf]
+
+        for caminho_pdf in pdf_paths:
             with open(caminho_pdf, "rb") as pdf_file:
-                part = MIMEBase("application", "pdf")  # Especificar MIME type corretamente
+                part = MIMEBase("application", "pdf")
                 part.set_payload(pdf_file.read())
                 encoders.encode_base64(part)
                 part.add_header(
                     "Content-Disposition",
-                    f"attachment; filename*=UTF-8''{os.path.basename(caminho_pdf)}",  # UTF-8 encoding no nome do arquivo
+                    f"attachment; filename*=UTF-8''{os.path.basename(caminho_pdf)}",
                 )
                 msg.attach(part)
 
