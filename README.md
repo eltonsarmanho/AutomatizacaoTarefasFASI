@@ -4,6 +4,93 @@
 
 O projeto "Automatização de Tarefas FASI" é um sistema completo para automatizar o fluxo de trabalho administrativo da Faculdade de Sistemas de Informação (FASI) da Universidade Federal do Pará, Campus Universitário de Cametá. 
 
+O sistema gerencia diversos processos acadêmicos, incluindo Atividades Curriculares Complementares (ACC), Trabalhos de Conclusão de Curso (TCC), Projetos Acadêmicos e Estágios.
+
+## 🏗️ Arquitetura do Sistema
+
+O sistema utiliza uma arquitetura **serverless** baseada em AWS Lambda, integrando múltiplos serviços para automatizar completamente o fluxo de trabalho administrativo.
+
+![Arquitetura do Sistema](diagrama/fluxo_lambda_gerencial.png)
+
+### 📋 Fluxo de Dados
+
+1. **👤 Usuário** preenche o formulário no **Google Forms**
+2. **📋 Dados** são submetidos com informações e anexos
+3. **🌐 AWS API Gateway** recebe a requisição POST via webhook
+4. **⚡ AWS Lambda** processa o formulário identificando o tipo
+5. **🔀 Roteador** direciona para o processamento específico (ACC, Projetos, TCC, Estágio ou Plano de Ensino)
+6. **⚙️ Processamento Paralelo** executa três threads simultâneas:
+   - **📧 Email**: Envia notificações para coordenação, pareceristas e alunos com documentos anexados
+   - **📝 Geração de Documentos**: 
+     - **📄 PDFs**: Cria parecer técnico e declaração (para projetos de extensão)
+     - **🧠 LLM**: Extrai e analisa dados automaticamente
+   - **☁️ Google Drive**: Organiza anexos em estrutura hierárquica de pastas
+7. **✅ Confirmação** retorna ao usuário (HTTP 200)
+
+### 🎯 Serviços Fornecidos
+
+#### 📧 **Notificações Automáticas**
+- Envio imediato de emails para todos os stakeholders
+- Anexos automáticos de documentos gerados
+- Distribuição para coordenação, pareceristas e alunos
+- Templates personalizados por tipo de formulário
+
+#### 📄 **Geração de Documentos**
+- **Parecer Técnico**: Documento formatado automaticamente para avaliação
+- **Declaração de Extensão**: Gerada apenas para projetos de extensão
+- **Formatação Profissional**: PDFs com identidade visual institucional
+- **Metadados Automáticos**: Data, nomes e informações extraídas do formulário
+
+#### 🧠 **Inteligência Artificial**
+- **Extração Inteligente**: LLM analisa e extrai informações relevantes
+- **Validação de Dados**: Verifica consistência das informações
+- **Sugestões Automáticas**: Identifica padrões e recomendações
+
+#### ☁️ **Organização no Google Drive**
+- **Estrutura Hierárquica**: Pastas organizadas por tipo/ano/docente/turma
+- **Movimentação Automática**: Anexos transferidos automaticamente
+- **Nomenclatura Padronizada**: Arquivos nomeados consistentemente
+- **5 Categorias de Armazenamento**:
+  - 📁 `ACC/Turma/Matrícula`
+  - 📁 `Projetos/Edital/Ano/Docente/Tipo`
+  - 📁 `TCC/Tipo/Turma/Aluno`
+  - 📁 `Estágio/Tipo/Turma/Aluno`
+  - 📁 `Plano de Ensino/Semestre`
+
+#### 🔄 **Tipos de Formulários Suportados**
+
+| Formulário | Descrição | Processamento |
+|-----------|-----------|---------------|
+| 📋 **ACC** | Atividades Curriculares Complementares | Email + Drive |
+| 🔬 **Projetos** | Pesquisa e Extensão | Email + PDF + Declaração (Extensão) + Drive |
+| 📝 **TCC** | Trabalho de Conclusão de Curso | Email + Drive |
+| 💼 **Estágio** | Obrigatório e Não-Obrigatório | Email + Drive |
+| 📚 **Plano de Ensino** | Disciplinas | Email + Drive |
+
+### 🚀 **Benefícios da Arquitetura Serverless**
+
+- ⚡ **Escalabilidade Automática**: Processa 1 ou 1000 requisições sem configuração
+- 💰 **Custo Otimizado**: Paga apenas pelo tempo de execução
+- 🔒 **Alta Disponibilidade**: 99.95% SLA da AWS
+- 🛡️ **Segurança**: Isolamento por execução, sem servidor exposto
+- 📊 **Monitoramento**: Logs automáticos no CloudWatch
+- 🔧 **Manutenção Zero**: Infraestrutura gerenciada pela AWS
+
+## 🚀 **Nova Implementação AWS Lambda**
+
+Este sistema foi **migrado para AWS Lambda** para oferecer maior escalabilidade, disponibilidade e redução de custos operacionais. A nova arquitetura serverless elimina a necessidade de manter servidores, oferecendo execução sob demanda e alta disponibilidade.
+
+## Visão Geral
+
+Este sistema automatiza o processamento de respostas do **Google Forms**, gerenciando anexos no **Google Drive**, enviando **notificações por e-mail** aos interessados, gerando **documentos PDF** e salvando registros em **CSV**. A solução elimina processos manuais, reduz erros e agiliza o fluxo de trabalho administrativo da faculdade.
+
+O sistema atende a diferentes tipos de formulários e processos acadêmicos:
+- **ACC**: Gerenciamento de Atividades Curriculares Complementares
+- **TCC**: Processamento de requisições e documentos de Trabalho de Conclusão de Curso
+- **Projetos**: Gerenciamento de projetos acadêmicos, incluindo geração de pareceres
+- **Estágio**: Processamento de documentação de estágios
+- **Plano de Ensino**: Processamento de documentação relacionada aos planos de ensino 
+
 
 **Para desenvolvimento e testes locais apenas:**
 
